@@ -1,4 +1,31 @@
-import { createConnection, Connection } from 'mysql2/promise';
+import { Connection, Pool, PoolConnection, createPool } from 'mysql2/promise';
+
+let pool: Pool | null = null;
+
+function getPool(): Pool {
+    
+    if (!pool) {
+    
+        pool = createPool({
+            host: process.env.DB_HOST,
+            port: Number(process.env.DB_PORT),
+            user: process.env.DB_USER,
+            password: process.env.DB_PASS,
+            database: 'fsph_ambulatorio',
+            namedPlaceholders: true,
+            decimalNumbers: true,
+            dateStrings: true,
+            charset: 'utf8mb4',
+            waitForConnections: true,
+            connectionLimit: 10,
+            queueLimit: 0,
+            enableKeepAlive: true,
+            keepAliveInitialDelay: 10000,
+        });
+    }
+
+    return pool;
+}
 
 export interface iDatabase {
     connection: Connection,
@@ -11,8 +38,7 @@ export interface iDatabase {
 
 export default class Database implements iDatabase {
 
-    private conn: Connection | null = null;
-    private dbname: string = 'fsph_ambulatorio';
+    private conn: PoolConnection | null = null;
     private transactionActive = false;
 
     constructor() { }
@@ -24,17 +50,7 @@ export default class Database implements iDatabase {
             return;
         }
 
-        this.conn = await createConnection({
-            host: process.env.DB_HOST,
-            port: Number(process.env.DB_PORT),
-            user: process.env.DB_USER,
-            password: process.env.DB_PASS,
-            database: this.dbname,
-            namedPlaceholders: true,
-            decimalNumbers: true,
-            dateStrings: true,
-            charset: 'utf8mb4'
-        });
+        this.conn = await getPool().getConnection();
 
     }
 
@@ -47,19 +63,29 @@ export default class Database implements iDatabase {
         return this.conn;
     }
 
-    // Fecha a conexao e reseta o estado da transacao local.
+    // Libera a conexao para reutilizacao e reseta o estado da transacao local.
     public async Disconnect(): Promise<void> {
+        
         if (!this.conn) {
             return;
         }
 
-        await this.conn.end();
+        const connection = this.conn;
         this.conn = null;
-        this.transactionActive = false;
+
+        try {
+            if (this.transactionActive) {
+                await connection.rollback();
+            }
+        } finally {
+            connection.release();
+            this.transactionActive = false;
+        }
     }
 
     // Inicia transacao apenas uma vez por ciclo de requisicao.
     public async Begin(): Promise<void> {
+        
         if (!this.conn || this.transactionActive) {
             return;
         }
@@ -70,6 +96,7 @@ export default class Database implements iDatabase {
 
     // Confirma alteracoes somente quando ha transacao ativa.
     public async Commit(): Promise<void> {
+        
         if (!this.conn || !this.transactionActive) {
             return;
         }
