@@ -158,7 +158,6 @@ export default class Controller_Dashboard {
             resdata.data.atendimentos_hemoderivados = hemoderivados;
             resdata.data.relatorio_boname = boname;
 
-
         } catch (error: any) {
             applyControllerError(resdata, error, 'Controller Dashboard');
         }
