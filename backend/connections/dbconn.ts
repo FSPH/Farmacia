@@ -1,4 +1,4 @@
-import { createConnection, Connection } from 'mysql2/promise';
+import { Connection, Pool, PoolConnection, createPool } from 'mysql2/promise';
 
 export interface iDatabase {
     connection: Connection,
@@ -11,13 +11,16 @@ export interface iDatabase {
 
 export default class Database implements iDatabase {
 
+<<<<<<< HEAD
     private conn: Connection | null = null;
     private dbname: string = 'fsph_farmacia';
+=======
+    private conn: PoolConnection | null = null;
+>>>>>>> da342a91f31b0009c7cd7b799129bd3c12134775
     private transactionActive = false;
+    private pool: Pool | null = null;
 
-    constructor(dbname: string = '') {
-        const db = dbname;
-    }
+    constructor() { }
 
     // Abre a conexao somente quando ela ainda nao existe no ciclo atual.
     public async Connect(): Promise<void> {
@@ -26,22 +29,39 @@ export default class Database implements iDatabase {
             return;
         }
 
-        this.conn = await createConnection({
-            host: process.env.DB_HOST,
-            port: Number(process.env.DB_PORT),
-            user: process.env.DB_USER,
-            password: process.env.DB_PASS,
-            database: 'fsph_farmacia',
-            namedPlaceholders: true,
-            decimalNumbers: true,
-            dateStrings: true,
-            charset: 'utf8mb4'
-        });
+        this.conn = await this.getPool().getConnection();
 
     }
+    // instancia o pool de conexoes
+    private getPool(): Pool {
+
+        if (!this.pool) {
+
+            this.pool = createPool({
+                host: process.env.DB_HOST,
+                port: Number(process.env.DB_PORT),
+                user: process.env.DB_USER,
+                password: process.env.DB_PASS,
+                database: 'fsph_ambulatorio',
+                namedPlaceholders: true,
+                decimalNumbers: true,
+                dateStrings: true,
+                charset: 'utf8mb4',
+                waitForConnections: true,
+                connectionLimit: 10,
+                queueLimit: 0,
+                enableKeepAlive: true,
+                keepAliveInitialDelay: 10000,
+            });
+        }
+
+        return this.pool;
+    }
+
 
     // Exige que a conexao tenha sido inicializada antes de expor o driver.
-    get connection(): Connection {
+    public get connection(): Connection {
+
         if (!this.conn) {
             throw new Error('Conexão com banco de dados não inicializada!');
         }
@@ -49,19 +69,29 @@ export default class Database implements iDatabase {
         return this.conn;
     }
 
-    // Fecha a conexao e reseta o estado da transacao local.
+    // Libera a conexao para reutilizacao e reseta o estado da transacao local.
     public async Disconnect(): Promise<void> {
+
         if (!this.conn) {
             return;
         }
 
-        await this.conn.end();
+        const connection = this.conn;
         this.conn = null;
-        this.transactionActive = false;
+
+        try {
+            if (this.transactionActive) {
+                await connection.rollback();
+            }
+        } finally {
+            connection.release();
+            this.transactionActive = false;
+        }
     }
 
     // Inicia transacao apenas uma vez por ciclo de requisicao.
     public async Begin(): Promise<void> {
+
         if (!this.conn || this.transactionActive) {
             return;
         }
@@ -72,6 +102,7 @@ export default class Database implements iDatabase {
 
     // Confirma alteracoes somente quando ha transacao ativa.
     public async Commit(): Promise<void> {
+
         if (!this.conn || !this.transactionActive) {
             return;
         }
@@ -82,6 +113,7 @@ export default class Database implements iDatabase {
 
     // Reverte alteracoes pendentes quando alguma etapa falha.
     public async Rollback(): Promise<void> {
+
         if (!this.conn || !this.transactionActive) {
             return;
         }

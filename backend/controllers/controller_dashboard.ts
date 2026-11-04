@@ -7,7 +7,6 @@ import settings from "../utils/settings.js";
 // Controla o CRUD de Dashboard mantendo o contrato padrao das respostas HTTP.
 export default class Controller_Dashboard {
 
-
     static async Listar(req: Request, res: Response) {
 
         // Inicializa infraestrutura da requisicao e o envelope padrao da resposta.
@@ -158,7 +157,6 @@ export default class Controller_Dashboard {
             resdata.data.dispensa_fatores_frascos = frascos;
             resdata.data.atendimentos_hemoderivados = hemoderivados;
             resdata.data.relatorio_boname = boname;
-
 
         } catch (error: any) {
             applyControllerError(resdata, error, 'Controller Dashboard');

@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef, useState } from 'react'
+import { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   Button,
@@ -379,8 +379,6 @@ export function AprovacaoEntradasCrudPage({
   const [editingItem, setEditingItem] = useState<EntradaItemRecord | null>(null)
   const [editItemForm, setEditItemForm] = useState<EditItemForm>(() => createDefaultEditItemForm())
   const [editItemErrors, setEditItemErrors] = useState<EditItemErrors>({})
-  const modalTableWrapRef = useRef<HTMLDivElement | null>(null)
-  const [modalTableWidth, setModalTableWidth] = useState(0)
 
   const resetEditItemState = () => {
     setEditingItem(null)
@@ -479,38 +477,6 @@ const aprovarEntradaMutation = useMutation({
   const modalPageLabelStart = modalItemsCount > 0 ? modalPageStart + 1 : 0
   const modalPageLabelEnd = modalItemsCount > 0 ? modalPageStart + paginatedModalItems.length : 0
   const modalTableHeight = isCompactLayout ? 360 : 430
-  const effectiveModalTableWidth = detailsModalOpen ? modalTableWidth : 0
-
-  useLayoutEffect(() => {
-    if (!detailsModalOpen) {
-      return
-    }
-
-    const container = modalTableWrapRef.current
-
-    if (!container) {
-      return
-    }
-
-    const updateTableWidth = () => {
-      setModalTableWidth(Math.max(0, Math.round(container.getBoundingClientRect().width)))
-    }
-
-    updateTableWidth()
-
-    const resizeObserver = new ResizeObserver(() => {
-      updateTableWidth()
-    })
-
-    resizeObserver.observe(container)
-    window.addEventListener('resize', updateTableWidth)
-
-    return () => {
-      resizeObserver.disconnect()
-      window.removeEventListener('resize', updateTableWidth)
-    }
-  }, [detailsModalOpen, isCompactLayout, modalItemsCount])
-
   const handleSubmitFilters = async () => {
     const nextErrors = validateFilters(filterValues)
     setFilterErrors(nextErrors)
@@ -998,12 +964,11 @@ size="sm"
                 <StatusBadge tone="info">{modalItemsCount} item{modalItemsCount > 1 ? 's' : ''}</StatusBadge>
               </div>
 
-              <div ref={modalTableWrapRef} className="boname-page__table-wrap aprovacao-entradas-page__modal-table-wrap">
+              <div className="boname-page__table-wrap aprovacao-entradas-page__modal-table-wrap">
                 <Table
-                  key={`${selectedEntrada?.id ?? 'sem-entrada'}-${effectiveModalTableWidth}`}
+                  key={selectedEntrada?.id ?? 'sem-entrada'}
                   data={paginatedModalItems}
                   height={modalTableHeight}
-                  width={effectiveModalTableWidth || undefined}
                   fillHeight
                   bordered
                   rowHeight={50}

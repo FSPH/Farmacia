@@ -17,7 +17,7 @@ export interface NotificationRecord {
     createdAt: string;
     actionLabel?: string;
     actionSectionKey?: string;
-    critical: boolean;
+    critical: boolean | null;
 }
 
 const __filename = fileURLToPath(import.meta.url);
@@ -41,8 +41,14 @@ class NotificationService extends EventEmitter {
     }
 
     async publish(notification: Pick<NotificationRecord, 'title' | 'description'> & Partial<Pick<NotificationRecord, 'id' | 'tone' | 'actionLabel' | 'actionSectionKey' | 'critical'>>): Promise<NotificationRecord> {
+        const existingNotification = this.findExistingNotification(notification.id);
+
+        if (existingNotification) {
+            return existingNotification;
+        }
+
         const record: NotificationRecord = {
-            id: notification.id || `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`,
+            id: this.createNotificationId(notification.id),
             title: notification.title.trim(),
             description: notification.description.trim(),
             tone: notification.tone || 'info',
@@ -50,14 +56,28 @@ class NotificationService extends EventEmitter {
             createdAt: new Date().toISOString(),
             actionLabel: notification.actionLabel?.trim(),
             actionSectionKey: notification.actionSectionKey?.trim(),
-            critical: false
+            critical: notification.critical ?? false
         };
 
-        this.notifications = [record, ...this.notifications.filter(item => item.id !== record.id)].slice(0, this.maxHistory);
+        this.notifications = [record, ...this.notifications].slice(0, this.maxHistory);
         await this.persist();
         this.emit('notification', record);
 
         return record;
+    }
+
+    private findExistingNotification(requestedId?: string): NotificationRecord | null {
+        const id = requestedId?.trim();
+
+        if (!id) {
+            return null;
+        }
+
+        return this.notifications.find(item => item.id === id) || null;
+    }
+
+    private createNotificationId(requestedId?: string): string {
+        return requestedId?.trim() || `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
     }
 
     async clear(): Promise<void> {

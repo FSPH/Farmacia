@@ -6,6 +6,7 @@ import Movimentacoes from "../model/dao_movimentacoes.js";
 import Depositos from "../model/dao_depositos.js";
 import Estoque from "../model/dao_estoque.js";
 import { notificationService } from "./controller_notificacoes.js";
+import { RowDataPacket } from "mysql2";
 
 // Expoe consultas e ajustes de estoque controlados por deposito, medicamento e lote.
 export default class Controller_Estoque {
@@ -463,7 +464,8 @@ export default class Controller_Estoque {
     }
 
     static async ListarItensPorLote(req: Request, res: Response) {
-        const db: iDatabase = new Database('fsph_ambulatorio');
+
+        const db: iDatabase = new Database();
 
         const resdata: iresdata = {
             err: 0,
@@ -499,7 +501,7 @@ export default class Controller_Estoque {
 
     static async AlertaValidade(req: Request, res: Response) {
 
-        const db: iDatabase = new Database('fsph_ambulatorio');
+        const db: iDatabase = new Database();
 
         const resdata: iresdata = {
             err: 0,
@@ -512,19 +514,24 @@ export default class Controller_Estoque {
 
             await db.Connect();
 
-            const query = `SELECT d.dep_descr, e.est_med_id,m.med_descr, m.med_und,e.est_lote,e.est_validade,m.med_alert,e.est_saldo_bloqueado,e.est_saldo_disponivel,DATEDIFF(e.est_validade,CURDATE()) as dias
+            //Checagem de Estoque Vencendo e Vencidos
+            let query = `SELECT d.dep_descr, e.est_med_id,m.med_descr, m.med_und,e.est_lote,e.est_validade,m.med_alert,e.est_saldo_bloqueado,e.est_saldo_disponivel,DATEDIFF(e.est_validade,CURDATE()) as dias
                             FROM tb_estoque e 
                             LEFT JOIN tb_medicamentos m ON m.med_id = e.est_med_id
                             LEFT JOIN tb_depositos d ON d.dep_id = e.est_dep_id
-                            WHERE (COALESCE(e.est_saldo_bloqueado,0) + COALESCE(e.est_saldo_disponivel,0)) > 0 AND DATEDIFF(e.est_validade,CURDATE()) <= m.med_alert`;
+                            WHERE (COALESCE(e.est_saldo_bloqueado,0) + COALESCE(e.est_saldo_disponivel,0)) > 0 AND DATEDIFF(e.est_validade,CURDATE()) <= m.med_alert
+                            ORDER BY dias ASC`;
 
             const [rows] = await db.connection.query(query);
 
             resdata.data = rows;
 
             if (Array.isArray(rows) && rows.length > 0) {
+
+                const notId = new Date().getDate().toString().padStart(2, '0') + new Date().getHours().toString().padStart(2, '0')
+
                 await notificationService.publish({
-                    id: 'estoque-alerta-validade',
+                    id: `NOT-${notId}`,
                     title: 'Alerta de Validade',
                     description: `${rows.length} lote${rows.length === 1 ? '' : 's'} com validade dentro do prazo de alerta ou vencidos.`,
                     tone: 'warning',
@@ -532,9 +539,36 @@ export default class Controller_Estoque {
                     actionSectionKey: 'estoque/alerta_validade',
                     critical: true
                 });
-            } else {
-                await notificationService.remove('estoque-alerta-validade');
+
             }
+
+            //Checagem de Realização dos Inventários Mensais 
+            query = `SELECT COALESCE(COUNT(*),0) AS qtde FROM tb_inventarios 
+                        WHERE YEAR(inv_date) = YEAR(CURDATE()) AND 
+                        MONTH(inv_date) = MONTH(CURDATE()) AND 
+                        inv_tipo = 'Total' AND inv_status = 1`
+
+            const [rows_inv] = await db.connection.query(query) as RowDataPacket[];
+
+            if (Array.isArray(rows_inv) && rows_inv.length > 0) {
+
+                const notId = new Date().getFullYear().toString().padStart(4, '0') + new Date().getDate().toString().padStart(2, '0')
+
+                if (rows_inv[0].qtde < 3) {
+
+                    await notificationService.publish({
+                        id: `NOT-${notId}`,
+                        title: 'Alerta de Inventário Mensal',
+                        description: `Ocorreram apenas ${rows_inv[0].qtde} dos ${3} inventários previstos para o mês.`,
+                        tone: 'info',
+                        actionLabel: 'Abrir pagina de Novos Inventários',
+                        actionSectionKey: 'operacao/inventarios/novo',
+                        critical: false
+                    });
+
+                }
+            }
+
 
         } catch (error: any) {
             applyControllerError(resdata, error, 'Controller Estoque - AlertaValidade');
