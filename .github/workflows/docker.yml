@@ -3,7 +3,10 @@ name: Build Docker
 # Publica astecfsph/farmacia:back e astecfsph/farmacia:front no Docker Hub a cada push na main.
 # Em pull request só faz o build (tsc / lint / vite build rodam dentro do Dockerfile), sem publicar.
 # Secrets obrigatórios (Settings > Secrets and variables > Actions): DOCKER_USERNAME e DOCKER_PASSWORD.
-# Variable opcional: VITE_API_BASE_URL (vazia = front chama http://<host>:3000).
+# Variables (Settings > Secrets and variables > Actions > Variables), fixadas no bundle do front:
+#   VITE_API_BASE_URL  opcional; vazia = http://<host-do-navegador>:3005
+#   VITE_API_AUTH      opcional; vazia = http://<host-do-navegador>:3008
+#   VITE_API_SA        opcional; vazia = http://<host-do-navegador>:3007
 
 on:
   push:
@@ -55,5 +58,7 @@ jobs:
             ${{ matrix.image }}:${{ matrix.name }}-${{ github.sha }}
           build-args: |
             VITE_API_BASE_URL=${{ vars.VITE_API_BASE_URL }}
+            VITE_API_AUTH=${{ vars.VITE_API_AUTH }}
+            VITE_API_SA=${{ vars.VITE_API_SA }}
           cache-from: type=gha,scope=${{ matrix.name }}
           cache-to: type=gha,mode=max,scope=${{ matrix.name }}

@@ -2,26 +2,30 @@
 # Portainer > Stacks > Add stack > Repository (este repo, arquivo docker-compose.yml) ou Web editor.
 # Variáveis em "Environment variables" do stack; localmente, num .env ao lado deste arquivo.
 # O banco MySQL é externo (DB_HOST); não há container de banco neste stack.
+#
+# Comunicação front -> back: o front é só arquivo estático. Quem chama a API é o NAVEGADOR do usuário,
+# não o container do front. Por isso o back fica publicado no host (porta 3005) e o front monta a URL
+# como http://<host que o usuário abriu>:3005. As variáveis VITE_* são fixadas no build (GitHub Actions);
+# defini-las aqui no Portainer não tem efeito.
 services:
   farmacia-back:
     # Rollback: BACK_TAG=back-<sha do commit>
     image: astecfsph/farmacia:${BACK_TAG:-back}
     container_name: farmacia-back
     ports:
-      # O frontend chama http://<host>:3000 por padrão. Se trocar a porta, rebuild o front com VITE_API_BASE_URL.
-      - "${API_PORT:-3000}:3000"
+      # Porta fixa: o front chama http://<host>:3005. Para trocar, mude aqui E rebuild
+      # o front com a Variable VITE_API_BASE_URL no GitHub.
+      - "3005:3005"
     restart: always
     environment:
       - NODE_ENV=${NODE_ENV:-production}
-      - PORT=3000
+      - PORT=3005
       - DB_HOST=${DB_HOST:?defina DB_HOST}
       - DB_PORT=${DB_PORT:-3306}
       - DB_USER=${DB_USER:?defina DB_USER}
       - DB_PASS=${DB_PASS:?defina DB_PASS}
-      # Autenticação (ver backend/middleware/auth.ts e utils/authSession.ts)
-      - AUTH_REQUIRED=${AUTH_REQUIRED:-false}
-      - AUTH_ALLOW_UNVERIFIED_TOKENS=${AUTH_ALLOW_UNVERIFIED_TOKENS:-false}
-      - AUTH_JWT_ALGORITHMS=${AUTH_JWT_ALGORITHMS:-}
+      # Autenticação: todo token é validado no barramento (backend/middleware/auth.ts)
+      - URL_AUTH_BARRAMENTO=${URL_AUTH_BARRAMENTO:?defina URL_AUTH_BARRAMENTO}
       - AUTH_JWT_SECRET=${AUTH_JWT_SECRET:-}
       - AUTH_JWT_PUBLIC_KEY_BASE64=${AUTH_JWT_PUBLIC_KEY_BASE64:-}
       - AUTH_SIMULATION_JWT_SECRET=${AUTH_SIMULATION_JWT_SECRET:-}
@@ -42,7 +46,7 @@ services:
           cpus: "0.50"
 
     healthcheck:
-      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/health').then(()=>process.exit(0),()=>process.exit(1))"]
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3005/health').then(()=>process.exit(0),()=>process.exit(1))"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -59,7 +63,7 @@ services:
     image: astecfsph/farmacia:${FRONT_TAG:-front}
     container_name: farmacia-front
     ports:
-      - "${FRONT_PORT:-8080}:8080"
+      - "5160:5160"
     restart: always
     depends_on:
       - farmacia-back
@@ -77,7 +81,7 @@ services:
           cpus: "0.25"
 
     healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:8080/"]
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:5160/"]
       interval: 30s
       timeout: 10s
       retries: 3

@@ -10,12 +10,6 @@ type JwtPayload = JsonRecord & {
 let latestAuthToken: string | null = null
 let tokenRenewalTimeout: ReturnType<typeof setTimeout> | null = null
 
-export function getAppId(): number {
-  const raw = String(import.meta.env.VITE_APP_ID || '').trim()
-  const parsed = Number(raw)
-  return Number.isFinite(parsed) && parsed > 0 ? parsed : 0
-}
-
 export function getAuthApiBaseUrl(): string {
   const configured = String(import.meta.env.VITE_API_AUTH || '').trim().replace(/\/$/, '')
   if (configured) {

@@ -27,7 +27,7 @@ import router_inventarios from './routes/routes_inventarios.js';
 import router_dashboard from './routes/routes_dashboard.js'
 import router_settings from './routes/routes_settings.js';
 import router_notificacoes from './routes/routes_notificacoes.js';
-import morgan from 'morgan';
+//import morgan from 'morgan';
 import helmet from 'helmet';
 
 import authMiddleware from './middleware/auth.js';
@@ -42,19 +42,9 @@ declare global {
 config({ path: '../.env' })
 
 const app = express();
-const port: number = Number(process.env.PORT || 3002);
+const port: number = Number(process.env.PORT || 3005);
 const allowedOrigins = new Set([
-    'http://localhost',
-    'http://172.23.42.17',
-    'http://172.23.84.244',
-    'http://172.23.84.244:8080',
-    'http://172.23.42.17:8080',
-    'http://localhost:5173',
-    'http://localhost:8080',
-    'http://192.168.0.8',
-    'http://192.168.0.8:8080',
-    'http://172.23.84.102:8080',
-    'http://172.23.84.102'
+    'https://172.23.42.30',
 ]);
 const corsAllowedHeaders = [
     'Authorization',
@@ -98,7 +88,7 @@ console.clear();
 
 app.use(helmet());
 
-app.use(morgan((tokens, req, res) => {
+/*app.use(morgan((tokens, req, res) => {
     return [
         tokens.method(req, res),
         tokens.url(req, res),
@@ -117,7 +107,7 @@ app.use(morgan((tokens, req, res) => {
             || requestPath === '/healthcheck'
             || requestPath === '/favicon.ico';
     }
-}));
+}));*/
 
 app.use(express.json({
     limit: '150kb',

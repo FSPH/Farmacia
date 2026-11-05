@@ -1,4 +1,4 @@
-import { getAppId, getAuthApiBaseUrl, getAuthToken, type JsonRecord } from './auth-helpers'
+import { getAuthApiBaseUrl, getAuthToken, type JsonRecord } from './auth-helpers'
 import { getSession, saveSession } from './storage-session'
 
 export type PermissionRoute = {
@@ -8,11 +8,6 @@ export type PermissionRoute = {
   route?: string
   url?: string
   pathname?: string
-  id_application?: number | string
-  applicationId?: number | string
-  idApplication?: number | string
-  app_id?: number | string
-  application_id?: number | string
   [key: string]: unknown
 }
 
@@ -70,18 +65,6 @@ export function extractGroupIds(upf: JsonRecord): number[] {
   }
 
   return []
-}
-
-function extractApplicationId(item: PermissionRoute): number | null {
-  const applicationId =
-    item.id_application
-    ?? item.applicationId
-    ?? item.idApplication
-    ?? item.app_id
-    ?? item.application_id
-
-  const normalized = Number(applicationId)
-  return Number.isFinite(normalized) ? normalized : null
 }
 
 export function normalizeRouteValue(value: unknown): string | null {
@@ -182,9 +165,7 @@ export async function syncUserPermissions(forceRefresh = false): Promise<Permiss
   }
 
   const userData = getSession<JsonRecord>('_upf')
-  const currentAppId = getAppId()
-
-  if (!userData || !currentAppId) {
+  if (!userData) {
     saveSession('_nav_m', [])
     return []
   }
@@ -222,7 +203,7 @@ export async function syncUserPermissions(forceRefresh = false): Promise<Permiss
 
         const json = (await response.json()) as PermissionRoute[] | { data?: PermissionRoute[] }
         const list = Array.isArray(json) ? json : Array.isArray(json.data) ? json.data : []
-        return list.filter((item) => extractApplicationId(item) === currentAppId)
+        return list
       } catch (error) {
         console.warn(`[Permissions] Falha ao buscar grupo ${groupId}:`, error)
         return [] as PermissionRoute[]

@@ -12,7 +12,7 @@ RUN npx tsc -p .
 FROM node:24-alpine
 WORKDIR /app
 ENV NODE_ENV=production \
-    PORT=3000
+    PORT=3005
 
 COPY package.json package-lock.json ./
 RUN npm ci --omit=dev --no-audit --no-fund && npm cache clean --force
@@ -31,10 +31,10 @@ RUN mkdir -p /app/data \
 
 USER node
 VOLUME ["/app/data"]
-EXPOSE 3000
+EXPOSE 3005
 
 # Qualquer resposta HTTP indica que o Express está de pé (a API não tem rota /health).
 HEALTHCHECK --interval=30s --timeout=10s --start-period=20s --retries=3 \
-    CMD node -e "fetch('http://127.0.0.1:'+(process.env.PORT||3000)+'/health').then(()=>process.exit(0),()=>process.exit(1))"
+    CMD node -e "fetch('http://127.0.0.1:'+(process.env.PORT||3005)+'/health').then(()=>process.exit(0),()=>process.exit(1))"
 
 CMD ["sh", "-c", "[ -f /app/data/settings.data.json ] || cp /app/defaults/settings.data.json /app/data/; exec node dist/farmacia.js"]
