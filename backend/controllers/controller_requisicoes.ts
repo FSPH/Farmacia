@@ -1629,10 +1629,7 @@ export default class Controller_Requisicoes {
             }
 
             // Busca todas as informações de um lote
-            const query = `
-                SELECT * from vw_rastreamento_lote
-                WHERE est_lote = :ent_lote;
-            `;
+            const query = `SELECT * from vw_rastreamento_lote WHERE est_lote = :ent_lote;`;
 
             const [rows] = await db.connection.query(query, { ent_lote: lote }) as RowDataPacket[];
 
