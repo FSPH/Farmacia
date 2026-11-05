@@ -13,7 +13,11 @@ import { AppModal, DataState, PageSection, StatusBadge, SummaryCard } from '../.
 import { getErrorMessage, useMessage } from '../../hooks/useMessage'
 import { getApiBaseUrl } from '../../lib/api-base-url'
 import { apiRequest } from '../../lib/api'
+import { userHasGroup } from '../../lib/auth-permissions'
 import '../boname/BonameCrudPage.css'
+
+/** Grupo Operadora SisStock — sem permissao para adicionar novo paciente. */
+const OPERADORA_SISSTOCK_GROUP_ID = 18
 
 type ApiListPayload<T> = T[] | [T[]]
 
@@ -634,7 +638,13 @@ export default function DemandasEspecificasCrudPage({
     setPatientLookupModalOpen(false)
   }
 
+  const canAddPaciente = !userHasGroup(OPERADORA_SISSTOCK_GROUP_ID)
+
   const handleAddPaciente = () => {
+    if (!canAddPaciente) {
+      return
+    }
+
     setPacienteModalMode('create')
     setDemandaFormValues(DEFAULT_DEMANDA_FORM_VALUES)
     setDemandaFormErrors({})
@@ -851,7 +861,13 @@ export default function DemandasEspecificasCrudPage({
             onChange={setFilterValue}
           />
           <HStack spacing={8} wrap className="boname-page__toolbar-actions">
-            <Button appearance="primary" startIcon={<PlusIcon />} onClick={handleAddPaciente}>
+            <Button
+              appearance="primary"
+              disabled={!canAddPaciente}
+              startIcon={<PlusIcon />}
+              title={!canAddPaciente ? 'Indisponivel para o grupo Operadora SisStock' : undefined}
+              onClick={handleAddPaciente}
+            >
               Adicionar Paciente
             </Button>
             <Button

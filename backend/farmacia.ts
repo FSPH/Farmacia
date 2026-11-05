@@ -42,7 +42,7 @@ declare global {
 config({ path: '../.env' })
 
 const app = express();
-const port: number = Number(process.env.PORT || 3000);
+const port: number = Number(process.env.PORT || 3002);
 const allowedOrigins = new Set([
     'http://localhost',
     'http://172.23.42.17',
@@ -52,12 +52,18 @@ const allowedOrigins = new Set([
     'http://localhost:5173',
     'http://localhost:8080',
     'http://192.168.0.8',
-    'http://192.168.0.8:8080'
+    'http://192.168.0.8:8080',
+    'http://172.23.84.102:8080',
+    'http://172.23.84.102'
 ]);
 const corsAllowedHeaders = [
     'Authorization',
     'Cache-Control',
     'Content-Type',
+    'Cookie',
+];
+const corsExposedHeaders = [
+    'x-new-token',
 ];
 
 function isLoopbackOrigin(origin: string): boolean {
@@ -131,6 +137,7 @@ app.use(cors({
     },
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
     allowedHeaders: corsAllowedHeaders,
+    exposedHeaders: corsExposedHeaders,
     credentials: true,
     optionsSuccessStatus: 204,
 

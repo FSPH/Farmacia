@@ -12,11 +12,11 @@
       "max_memory_restart": "512M",
       "env": {
         "NODE_ENV": "production",
-        "PORT": "3000"
+        "PORT": "3002"
       },
       "env_homolog": {
         "NODE_ENV": "production",
-        "PORT": "3000"
+        "PORT": "3002"
       },
       "error_file": "/home/ovidio-neto/farmacia/logs/farmacia-api-error.log",
       "out_file": "/home/ovidio-neto/farmacia/logs/farmacia-api-out.log",
