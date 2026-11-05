@@ -1,0 +1,93 @@
+# Stack da Farmácia Ambulatorial para o Portainer (imagens publicadas por .github/workflows/docker.yml).
+# Portainer > Stacks > Add stack > Repository (este repo, arquivo docker-compose.yml) ou Web editor.
+# Variáveis em "Environment variables" do stack; localmente, num .env ao lado deste arquivo.
+# O banco MySQL é externo (DB_HOST); não há container de banco neste stack.
+services:
+  farmacia-back:
+    # Rollback: BACK_TAG=back-<sha do commit>
+    image: astecfsph/farmacia:${BACK_TAG:-back}
+    container_name: farmacia-back
+    ports:
+      # O frontend chama http://<host>:3000 por padrão. Se trocar a porta, rebuild o front com VITE_API_BASE_URL.
+      - "${API_PORT:-3000}:3000"
+    restart: always
+    environment:
+      - NODE_ENV=${NODE_ENV:-production}
+      - PORT=3000
+      - DB_HOST=${DB_HOST:?defina DB_HOST}
+      - DB_PORT=${DB_PORT:-3306}
+      - DB_USER=${DB_USER:?defina DB_USER}
+      - DB_PASS=${DB_PASS:?defina DB_PASS}
+      # Autenticação (ver backend/middleware/auth.ts e utils/authSession.ts)
+      - AUTH_REQUIRED=${AUTH_REQUIRED:-false}
+      - AUTH_ALLOW_UNVERIFIED_TOKENS=${AUTH_ALLOW_UNVERIFIED_TOKENS:-false}
+      - AUTH_JWT_ALGORITHMS=${AUTH_JWT_ALGORITHMS:-}
+      - AUTH_JWT_SECRET=${AUTH_JWT_SECRET:-}
+      - AUTH_JWT_PUBLIC_KEY_BASE64=${AUTH_JWT_PUBLIC_KEY_BASE64:-}
+      - AUTH_SIMULATION_JWT_SECRET=${AUTH_SIMULATION_JWT_SECRET:-}
+      - AUTH_COOKIE_SECURE=${AUTH_COOKIE_SECURE:-}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      # settings.data.json e notificacoes.json sobrevivem a redeploy/atualização da imagem
+      - farmacia_data:/app/data
+
+    security_opt:
+      - no-new-privileges:true
+
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: "0.50"
+
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/health').then(()=>process.exit(0),()=>process.exit(1))"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  farmacia-front:
+    # Rollback: FRONT_TAG=front-<sha do commit>
+    image: astecfsph/farmacia:${FRONT_TAG:-front}
+    container_name: farmacia-front
+    ports:
+      - "${FRONT_PORT:-8080}:8080"
+    restart: always
+    depends_on:
+      - farmacia-back
+
+    read_only: true
+    tmpfs:
+      - /tmp:size=32m
+    security_opt:
+      - no-new-privileges:true
+
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+          cpus: "0.25"
+
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:8080/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  farmacia_data:
