@@ -11,12 +11,7 @@ export interface iDatabase {
 
 export default class Database implements iDatabase {
 
-<<<<<<< HEAD
-    private conn: Connection | null = null;
-    private dbname: string = 'fsph_farmacia';
-=======
     private conn: PoolConnection | null = null;
->>>>>>> da342a91f31b0009c7cd7b799129bd3c12134775
     private transactionActive = false;
     private pool: Pool | null = null;
 

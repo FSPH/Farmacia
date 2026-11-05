@@ -229,10 +229,12 @@ function App() {
       <AppModal
         open={idleExpired}
         backdrop="static"
+        className="idle-session-modal"
         intent="confirm"
         intentVisible={false}
         onClose={handleIdleModalClose}
-        size="xs"
+        overflow={false}
+        size="sm"
         title="Sessao expirada"
         footer={(
           <Button appearance="primary" onClick={handleIdleModalClose}>
