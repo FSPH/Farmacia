@@ -117,8 +117,9 @@
 .boname-page__table-wrap {
   flex: 1 1 auto;
   min-height: 0;
+  min-width: 0;
   width: 100%;
-  overflow: hidden;
+  overflow: auto;
   border: 1px solid #e3ebf4;
   border-radius: 1.15rem;
   background: #fff;
