@@ -782,8 +782,6 @@ export default class Controller_Requisicoes {
                 throw error;
             }
 
-            await demandas.BuscarPorPaciente(Number(requisicoes.req_pac_id));
-
             const gerarDdu = settings.local_id === Number(requisicoes.req_local_id);
             const requisicao_dispensacao = requisicoes.req_tip_id !== settings.tipo_req_id_devolucao;
 
@@ -802,6 +800,8 @@ export default class Controller_Requisicoes {
 
                 }
             }
+
+            await demandas.BuscarPorPaciente(Number(requisicoes.req_pac_id));
 
             for (const item of itens) {
 
