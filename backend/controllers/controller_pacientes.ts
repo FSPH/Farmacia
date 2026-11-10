@@ -22,12 +22,12 @@ export default class Controller_Pacientes {
                                        FROM fsph_ambulatorio.tb_pacientes`;
 
                   if (pesq !== '*') {
-                        query += `  WHERE MATCH(nom_paciente,nom_social,cpf) AGAINST(CONCAT("*",:pesq,"*") IN BOOLEAN MODE)`;
+                        query += `  WHERE nom_paciente LIKE :pesq AND nom_social = :pesq AND cpf = :pesq`;
                   } else {
                         query += ` LIMIT 10`;
                   }
 
-                  const [result] = await db.connection.query(query, { pesq });
+                  const [result] = await db.connection.query(query, { pesq: "%" + pesq + "%" });
 
                   resdata.data = result;
 
@@ -74,7 +74,7 @@ export default class Controller_Pacientes {
 
       }
 
-      static async SalvarPaciente(req: Request,res: Response) {
+      static async SalvarPaciente(req: Request, res: Response) {
 
             const db: iDatabase = new Database();
 

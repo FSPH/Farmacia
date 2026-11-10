@@ -6,6 +6,11 @@ export enum eStatus {
     Fechado = 1,
 }
 
+export enum eTipo {
+    Total = 'Total',
+    Parcial = 'Parcial'
+}
+
 export interface iInventariosFields {
     inv_id: number,
     inv_date: Date | string | null,
@@ -103,6 +108,25 @@ export default class Inventarios extends BaseModel implements iBaseModel, iInven
         }
 
         return this._fields;
+    }
+
+    public async CheckInventarioExist(deposito: number, ano: number, mes: number, med_tipo_codigo: string): Promise<Boolean> {
+
+        const tipo: string = eTipo.Total;
+
+        const query: string = `SELECT YEAR(inv_date) AS ano, MONTH(inv_date) AS mes
+                               FROM tb_inventarios tb_entradas
+                               WHERE inv_dep_id = :deposito AND YEAR(inv_date) = :ano AND MONTH(inv_date) = :mes AND inv_tipo = :tipo AND inv_med_tipo_codigo = :med_tipo_codigo`
+
+        const [rows] = await this.ExecuteQuery(query, { deposito, ano, mes, tipo, med_tipo_codigo }) as RowDataPacket[]
+
+        if (rows[0].length > 0) {
+            return false;
+        }
+        else {
+            return true;
+        }
+
     }
 
 }
