@@ -81,7 +81,7 @@ export default class Movimentacoes extends BaseModel implements iMovimentacoesFi
 
         const [rows] = await this.ExecuteQuery(query, { pesq: `%${pesq}%`, data_ini, data_fim, tipo_med }) as [RowDataPacket[]];
 
-        return normalizeMovementDates(rows as RowDataPacket[]);
+        return rows as RowDataPacket[];
 
     }
 
@@ -96,7 +96,7 @@ export default class Movimentacoes extends BaseModel implements iMovimentacoesFi
 
         const [rows] = await this.ExecuteQuery(query, { med_id }) as [RowDataPacket[]];
 
-        return normalizeMovementDates(rows as RowDataPacket[]);
+        return rows as RowDataPacket[];
 
     }
 }

@@ -139,7 +139,10 @@ export default class Requisicoes extends BaseModel implements iRequisicoesFields
 
     public async BuscarDadosImpressao(req_id: number): Promise<RowDataPacket | null> {
 
-        const query = `SELECT * FROM vw_dados_impressao WHERE req_id = :req_id`;
+        const query = `SELECT impressao.*, p.peso, p.coagweb_codigo
+                       FROM vw_dados_impressao impressao
+                       LEFT JOIN fsph_ambulatorio.tb_pacientes p ON p.num_paciente = impressao.num_paciente
+                       WHERE impressao.req_id = :req_id`;
 
         const [rows] = await this.ExecuteQuery(query, { req_id }) as [RowDataPacket[]];
 
