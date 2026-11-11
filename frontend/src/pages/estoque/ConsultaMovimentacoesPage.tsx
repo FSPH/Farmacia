@@ -7,6 +7,7 @@ import { Cell, Column, HeaderCell, Table } from '../../components/Table'
 import { DataState, PageSection, StatusBadge } from '../../components/ui'
 import { getErrorMessage, useMessage } from '../../hooks/useMessage'
 import { getApiBaseUrl } from '../../lib/api-base-url'
+import { formatDateTimeForDisplay as formatCalendarDateTimeForDisplay, parseCalendarDate } from '../../lib/date'
 import '../boname/BonameCrudPage.css'
 import './ConsultaMovimentacoesPage.css'
 
@@ -104,17 +105,7 @@ function getDefaultFilterValues(): FilterValues {
 }
 
 function formatDateTimeForDisplay(value: Date | string | null): string {
-  if (!value) {
-    return '-'
-  }
-
-  const parsedDate = value instanceof Date ? value : new Date(value)
-
-  if (Number.isNaN(parsedDate.getTime())) {
-    return '-'
-  }
-
-  return parsedDate.toLocaleString('pt-BR')
+  return formatCalendarDateTimeForDisplay(value)
 }
 
 function formatNumber(value: number | null): string {
@@ -125,10 +116,10 @@ function formatNumber(value: number | null): string {
 }
 
 function getRangeInDays(dataInicial: string, dataFinal: string): number | null {
-  const initialDate = new Date(dataInicial)
-  const finalDate = new Date(dataFinal)
+  const initialDate = parseCalendarDate(dataInicial)
+  const finalDate = parseCalendarDate(dataFinal)
 
-  if (Number.isNaN(initialDate.getTime()) || Number.isNaN(finalDate.getTime())) {
+  if (!initialDate || !finalDate) {
     return null
   }
 
@@ -194,18 +185,22 @@ function validateFilters(values: FilterValues): FilterErrors {
     return errors
   }
 
-  const initialDate = new Date(values.dataInicial)
-  const finalDate = new Date(values.dataFinal)
+  const initialDate = parseCalendarDate(values.dataInicial)
+  const finalDate = parseCalendarDate(values.dataFinal)
 
-  if (Number.isNaN(initialDate.getTime())) {
+  if (!initialDate) {
     errors.dataInicial = 'Data inicial invalida.'
   }
 
-  if (Number.isNaN(finalDate.getTime())) {
+  if (!finalDate) {
     errors.dataFinal = 'Data final invalida.'
   }
 
   if (errors.dataInicial || errors.dataFinal) {
+    return errors
+  }
+
+  if (!initialDate || !finalDate) {
     return errors
   }
 

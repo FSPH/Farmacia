@@ -9,6 +9,7 @@ import { AppModal, DataState, PageSection, StatusBadge } from '../../components/
 import { useMask } from '../../hooks/useMask'
 import { getErrorMessage, useMessage } from '../../hooks/useMessage'
 import { apiRequest } from '../../lib/api'
+import { formatDateForDisplay as formatCalendarDateForDisplay } from '../../lib/date'
 import '../boname/BonameCrudPage.css'
 
 interface PacienteListRecord {
@@ -56,17 +57,7 @@ function normalizeSingle<T>(payload: unknown): T | null {
 }
 
 function formatDateForDisplay(value: string | null): string {
-  if (!value) {
-    return '-'
-  }
-
-  const parsedDate = new Date(value)
-
-  if (Number.isNaN(parsedDate.getTime())) {
-    return '-'
-  }
-
-  return parsedDate.toLocaleDateString('pt-BR')
+  return formatCalendarDateForDisplay(value)
 }
 
 function formatText(value: string | number | null | undefined): string {

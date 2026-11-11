@@ -1,3 +1,5 @@
+import { formatDateForDisplay } from '../lib/date'
+
 type MaskValue = Date | number | string | null | undefined
 
 export function maskText(value: MaskValue): string {
@@ -18,17 +20,7 @@ export function maskAlphanumeric(value: MaskValue): string {
 }
 
 export function maskDate(value: Date | string | null | undefined): string {
-  if (!value) {
-    return '-'
-  }
-
-  const parsedDate = value instanceof Date ? value : new Date(value)
-
-  if (Number.isNaN(parsedDate.getTime())) {
-    return '-'
-  }
-
-  return parsedDate.toLocaleDateString('pt-BR')
+  return formatDateForDisplay(value)
 }
 
 export function maskNumber(value: number | string | null | undefined): string {

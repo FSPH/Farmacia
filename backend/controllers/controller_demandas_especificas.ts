@@ -13,6 +13,7 @@ import { buildPdfBrandHeaderStack } from "../utils/pdfBrandHeader.js";
 import pdfMake from "pdfmake/build/pdfmake.js";
 import pdfFonts from "pdfmake/build/vfs_fonts.js";
 import { RowDataPacket } from 'mysql2';
+import { formatDatePtBr } from '../utils/date.js';
 
 pdfMake.addVirtualFileSystem(pdfFonts);
 
@@ -30,17 +31,7 @@ export default class Controller_DemandasEspecificas {
     }
 
     private static formatDate(value: Date | string | null): string {
-        if (!value) {
-            return '';
-        }
-
-        const date = value instanceof Date ? value : new Date(value);
-
-        if (Number.isNaN(date.getTime())) {
-            return '';
-        }
-
-        return date.toLocaleDateString('pt-BR', { timeZone: 'America/Maceio' });
+        return formatDatePtBr(value);
     }
 
     static async Buscar(req: Request, res: Response) {
