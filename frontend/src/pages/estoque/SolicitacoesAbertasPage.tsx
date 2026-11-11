@@ -10,6 +10,7 @@ import { AppModal, DataState, PageSection, StatusBadge } from '../../components/
 import { getErrorMessage, useMessage } from '../../hooks/useMessage'
 import { apiRequest } from '../../lib/api'
 import { getApiBaseUrl } from '../../lib/api-base-url'
+import { getSessionUsername } from '../../lib/auth-helpers'
 import { formatDateForDisplay as formatCalendarDateForDisplay } from '../../lib/date'
 import '../boname/BonameCrudPage.css'
 import './SolicitacoesAbertasPage.css'

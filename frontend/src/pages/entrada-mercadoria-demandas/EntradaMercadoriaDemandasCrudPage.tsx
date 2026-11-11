@@ -10,6 +10,7 @@ import { AppModal, DataState, PageSection, ReferenceNotification } from '../../c
 import { getErrorMessage, useMessage } from '../../hooks/useMessage'
 import { useMask } from '../../hooks/useMask'
 import { getApiBaseUrl } from '../../lib/api-base-url'
+import { getSessionUsername } from '../../lib/auth-helpers'
 import { formatDateForDisplay } from '../../lib/date'
 import '../boname/BonameCrudPage.css'
 

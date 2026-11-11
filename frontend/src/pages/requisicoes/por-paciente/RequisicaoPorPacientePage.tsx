@@ -13,6 +13,7 @@ import { AppModal, DataState, PageSection, ReferenceNotification, StatusBadge } 
 import { getErrorMessage, useMessage } from '../../../hooks/useMessage'
 import { maskDate, useMask } from '../../../hooks/useMask'
 import { getApiBaseUrl } from '../../../lib/api-base-url'
+import { getSessionUsername } from '../../../lib/auth-helpers'
 import { formatDateForApi as formatCalendarDateForApi, parseCalendarDate } from '../../../lib/date'
 import '../../boname/BonameCrudPage.css'
 
