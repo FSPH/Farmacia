@@ -8,6 +8,7 @@ import { DataState, PageSection, ReferenceNotification, StatusBadge } from '../.
 import { getErrorMessage, useMessage } from '../../../hooks/useMessage'
 import { useMask } from '../../../hooks/useMask'
 import { apiRequest } from '../../../lib/api'
+import { formatDateForApi as formatCalendarDateForApi } from '../../../lib/date'
 import '../../boname/BonameCrudPage.css'
 
 type RequisicaoDevolucaoRecord = {
@@ -116,17 +117,8 @@ function formatDateForApi(value: string): string {
 }
 
 function formatDateValueForApi(value: string | null | undefined): string | null {
-  if (!value) {
-    return null
-  }
-
-  const parsedDate = new Date(value)
-
-  if (Number.isNaN(parsedDate.getTime())) {
-    return null
-  }
-
-  return formatDateForApi(formatDateForInput(parsedDate))
+  const formattedDate = formatCalendarDateForApi(value)
+  return formattedDate || null
 }
 
 function getRequisicaoDestino(requisicao: RequisicaoDevolucaoRecord) {

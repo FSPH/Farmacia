@@ -11,6 +11,7 @@ import { AppModal, DataState, PageSection, ReferenceNotification, StatusBadge } 
 import { getErrorMessage, useMessage } from '../../../hooks/useMessage'
 import { maskDate, useMask } from '../../../hooks/useMask'
 import { getApiBaseUrl } from '../../../lib/api-base-url'
+import { formatDateForApi as formatCalendarDateForApi, parseCalendarDate } from '../../../lib/date'
 import '../../boname/BonameCrudPage.css'
 
 type ApiResponse<T> = {
@@ -158,17 +159,8 @@ function formatDateForApi(value: string): string {
 }
 
 function formatDateValueForApi(value: Date | string | null): string | null {
-  if (!value) {
-    return null
-  }
-
-  const parsedDate = value instanceof Date ? value : new Date(value)
-
-  if (Number.isNaN(parsedDate.getTime())) {
-    return null
-  }
-
-  return `${formatDateForInput(parsedDate)}T00:00:00`
+  const formattedDate = formatCalendarDateForApi(value)
+  return formattedDate || null
 }
 
 function resolveValidityBadge(
@@ -179,9 +171,9 @@ function resolveValidityBadge(
     return { label: 'Sem validade', tone: 'neutral' }
   }
 
-  const parsedDate = value instanceof Date ? value : new Date(value)
+  const parsedDate = parseCalendarDate(value)
 
-  if (Number.isNaN(parsedDate.getTime())) {
+  if (!parsedDate) {
     return { label: 'Sem validade', tone: 'neutral' }
   }
 

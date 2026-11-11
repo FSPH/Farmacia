@@ -10,6 +10,7 @@ import { AppModal, DataState, PageSection, StatusBadge } from '../../components/
 import { getErrorMessage, useMessage } from '../../hooks/useMessage'
 import { apiRequest } from '../../lib/api'
 import { getApiBaseUrl } from '../../lib/api-base-url'
+import { formatDateForDisplay as formatCalendarDateForDisplay } from '../../lib/date'
 import '../boname/BonameCrudPage.css'
 import './SolicitacoesAbertasPage.css'
 
@@ -43,17 +44,7 @@ const EMPTY_SOLICITACAO_ABERTA_ITEMS: SolicitacaoAbertaItemRecord[] = []
 const EMPTY_SOLICITACAO_ABERTA_RECORDS: SolicitacaoAbertaRecord[] = []
 
 function formatDateForDisplay(value?: string | null): string {
-  if (!value) {
-    return '-'
-  }
-
-  const parsedDate = new Date(`${String(value).slice(0, 10)}T00:00:00`)
-
-  if (Number.isNaN(parsedDate.getTime())) {
-    return '-'
-  }
-
-  return parsedDate.toLocaleDateString('pt-BR')
+  return formatCalendarDateForDisplay(value)
 }
 
 function formatText(value?: string | number | null): string {

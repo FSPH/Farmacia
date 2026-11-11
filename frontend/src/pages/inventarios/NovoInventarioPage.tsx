@@ -7,6 +7,7 @@ import { Cell, Column, HeaderCell, Table } from '../../components/Table'
 import { DataState, PageSection } from '../../components/ui'
 import { getErrorMessage, useMessage } from '../../hooks/useMessage'
 import { getApiBaseUrl } from '../../lib/api-base-url'
+import { formatDateForDisplay as formatCalendarDateForDisplay, parseCalendarDate } from '../../lib/date'
 import '../boname/BonameCrudPage.css'
 
 interface ApiResponse<T> {
@@ -108,31 +109,12 @@ function normalizeSearchText(value: string): string {
 }
 
 function formatDateForDisplay(value: Date | string | null | undefined): string {
-  if (!value) {
-    return '-'
-  }
-
-  const parsedDate = value instanceof Date ? value : new Date(value)
-
-  if (Number.isNaN(parsedDate.getTime())) {
-    return '-'
-  }
-
-  return parsedDate.toLocaleDateString('pt-BR')
+  return formatCalendarDateForDisplay(value)
 }
 
 function formatDateForPayload(value: Date | string | null | undefined): string {
-  if (!value) {
-    return ''
-  }
-
-  const parsedDate = value instanceof Date ? value : new Date(value)
-
-  if (Number.isNaN(parsedDate.getTime())) {
-    return ''
-  }
-
-  return `${formatDateForInput(parsedDate)}T00:00:00`
+  const parsedDate = parseCalendarDate(value)
+  return parsedDate ? `${formatDateForInput(parsedDate)}T00:00:00` : ''
 }
 
 async function requestInventario<T>(

@@ -20,6 +20,7 @@ import ControleDDU from "../model/dao_controle_ddu.js";
 import settings from "../utils/settings.js";
 import Movimentacoes from "../model/dao_movimentacoes.js";
 import { RowDataPacket } from "mysql2";
+import { formatDatePtBr, formatDateTimePtBr } from "../utils/date.js";
 
 pdfMake.addVirtualFileSystem(pdfFonts);
 
@@ -38,33 +39,11 @@ export default class Controller_Requisicoes {
 
     // Formata data para dd/mm/yyyy
     private static formatDate(value: Date | string | null): string {
-
-        if (!value) {
-            return '';
-        }
-
-        const date = value instanceof Date ? value : new Date(value);
-
-        if (Number.isNaN(date.getTime())) {
-            return '';
-        }
-
-        return date.toLocaleDateString('pt-BR', { timeZone: 'America/Maceio' });
+        return formatDatePtBr(value);
     }
 
     private static formatDateTime(value: Date | string | null): string {
-
-        if (!value) {
-            return '';
-        }
-
-        const date = value instanceof Date ? value : new Date(value);
-
-        if (Number.isNaN(date.getTime())) {
-            return '';
-        }
-
-        return date.toLocaleString('pt-BR', { timeZone: 'America/Maceio' });
+        return formatDateTimePtBr(value);
     }
 
     private static formatText(value: unknown, fallback = '-'): string {

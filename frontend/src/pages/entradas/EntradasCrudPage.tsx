@@ -25,6 +25,7 @@ import { AppModal, DataState, PageSection } from '../../components/ui'
 import { getErrorMessage, useMessage } from '../../hooks/useMessage'
 import { useMask } from '../../hooks/useMask'
 import { getApiBaseUrl } from '../../lib/api-base-url'
+import { formatDateTimeForDisplay as formatCalendarDateTimeForDisplay, formatDateForDisplay as formatCalendarDateForDisplay } from '../../lib/date'
 import '../boname/BonameCrudPage.css'
 
 export interface EntradaListItem {
@@ -182,13 +183,8 @@ function parseDateFromInput(value: string): Date | null {
 }
 
 function formatDateForDisplay(value: string) {
-  const parsedDate = parseDateFromInput(String(value).slice(0, 10))
-
-  if (!parsedDate) {
-    return 'Data invalida'
-  }
-
-  return parsedDate.toLocaleDateString('pt-BR')
+  const formattedDate = formatCalendarDateForDisplay(value)
+  return formattedDate === '-' ? 'Data invalida' : formattedDate
 }
 
 function formatDateForApi(value: string): string {
@@ -197,17 +193,7 @@ function formatDateForApi(value: string): string {
 }
 
 function formatDateTimeForDisplay(value: Date | string | null | undefined): string {
-  if (!value) {
-    return '-'
-  }
-
-  const parsedDate = value instanceof Date ? value : new Date(value)
-
-  if (Number.isNaN(parsedDate.getTime())) {
-    return '-'
-  }
-
-  return parsedDate.toLocaleString('pt-BR')
+  return formatCalendarDateTimeForDisplay(value)
 }
 
 function normalizeSearchTerm(value: string): string {
