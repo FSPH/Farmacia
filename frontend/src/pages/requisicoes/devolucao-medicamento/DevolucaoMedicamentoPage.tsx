@@ -8,6 +8,7 @@ import { DataState, PageSection, ReferenceNotification, StatusBadge } from '../.
 import { getErrorMessage, useMessage } from '../../../hooks/useMessage'
 import { useMask } from '../../../hooks/useMask'
 import { apiRequest } from '../../../lib/api'
+import { getSessionUsername } from '../../../lib/auth-helpers'
 import { formatDateForApi as formatCalendarDateForApi } from '../../../lib/date'
 import '../../boname/BonameCrudPage.css'
 
