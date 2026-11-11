@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery } from '@tanstack/react-query'
 import ReloadIcon from '@rsuite/icons/Reload'
 import SearchIcon from '@rsuite/icons/Search'
 import VisibleIcon from '@rsuite/icons/Visible'
@@ -7,6 +7,7 @@ import { Button, HStack, IconButton, Input, InputNumber, Pagination, Panel, Tool
 import { Table as AppTable, type TableColumn } from '../../components/Table'
 import { AppModal, DataState, PageSection, StatusBadge } from '../../components/ui'
 import { useMask } from '../../hooks/useMask'
+import { getErrorMessage, useMessage } from '../../hooks/useMessage'
 import { apiRequest } from '../../lib/api'
 import '../boname/BonameCrudPage.css'
 
@@ -25,6 +26,8 @@ interface PacienteDetalheRecord extends PacienteListRecord {
   endereco: string | null
   nom_mae: string | null
   nom_pai: string | null
+  peso: number | string | null
+  coagweb_codigo: string | null
   telefone: string | null
   uf: string | null
 }
@@ -66,7 +69,7 @@ function formatDateForDisplay(value: string | null): string {
   return parsedDate.toLocaleDateString('pt-BR')
 }
 
-function formatText(value: string | null | undefined): string {
+function formatText(value: string | number | null | undefined): string {
   const normalizedValue = String(value || '').trim()
   return normalizedValue || '-'
 }
@@ -81,17 +84,33 @@ async function visualizarPaciente(numPaciente: number): Promise<PacienteDetalheR
   return normalizeSingle<PacienteDetalheRecord>(response)
 }
 
+interface SalvarPacientePayload {
+  coagweb_codigo: string | null
+  numPaciente: number
+  peso: number | null
+}
+
+async function salvarPaciente({ coagweb_codigo, numPaciente, peso }: SalvarPacientePayload): Promise<void> {
+  await apiRequest(`/pacientes/salvar_paciente/${numPaciente}`, {
+    body: JSON.stringify({ coagweb_codigo, peso }),
+    method: 'PUT',
+  })
+}
+
 export interface PacientesAmbulatorioCrudPageProps {
   _unused?: never
 }
 
 export default function PacientesAmbulatorioCrudPage() {
   const mask = useMask()
+  const message = useMessage()
   const [isCompactLayout] = useMediaQuery('(max-width: 768px)')
   const [searchValue, setSearchValue] = useState('')
   const [submittedSearch, setSubmittedSearch] = useState<string | null>(null)
   const [activePage, setActivePage] = useState(1)
   const [selectedPatient, setSelectedPatient] = useState<PacienteListRecord | null>(null)
+  const [pesoDraft, setPesoDraft] = useState<string | null>(null)
+  const [coagwebCodigoDraft, setCoagwebCodigoDraft] = useState<string | null>(null)
 
   const pacientesQuery = useQuery({
     enabled: submittedSearch !== null,
@@ -105,6 +124,19 @@ export default function PacientesAmbulatorioCrudPage() {
     queryFn: () => visualizarPaciente(selectedPatient!.num_paciente),
     queryKey: ['paciente-ambulatorio-detalhe', selectedPatient?.num_paciente ?? null],
     retry: false,
+  })
+
+  const salvarPacienteMutation = useMutation({
+    mutationFn: salvarPaciente,
+    onError: (error: Error) => {
+      message.error('Erro ao salvar paciente', getErrorMessage(error))
+    },
+    onSuccess: async () => {
+      message.success('Paciente salvo', 'Peso e código Coagweb atualizados com sucesso.')
+      await pacienteDetalheQuery.refetch()
+      setPesoDraft(null)
+      setCoagwebCodigoDraft(null)
+    },
   })
 
   const pacientes = pacientesQuery.data ?? []
@@ -129,6 +161,32 @@ export default function PacientesAmbulatorioCrudPage() {
 
   const closeDetailsModal = () => {
     setSelectedPatient(null)
+    setPesoDraft(null)
+    setCoagwebCodigoDraft(null)
+  }
+
+  const handleSavePatient = async () => {
+    if (!selectedPatient || !pacienteDetalheQuery.data) {
+      return
+    }
+
+    const pesoValue = pesoDraft ?? (pacienteDetalheQuery.data.peso === null ? '' : String(pacienteDetalheQuery.data.peso))
+    const peso = pesoValue.trim() === '' ? null : Number(pesoValue.replace(',', '.'))
+
+    if (peso !== null && !Number.isFinite(peso)) {
+      message.error('Peso inválido', 'Informe um valor numérico válido para o peso.')
+      return
+    }
+
+    try {
+      await salvarPacienteMutation.mutateAsync({
+        coagweb_codigo: (coagwebCodigoDraft ?? pacienteDetalheQuery.data.coagweb_codigo ?? '').trim() || null,
+        numPaciente: selectedPatient.num_paciente,
+        peso,
+      })
+    } catch {
+      // A mutation já exibe a mensagem de erro.
+    }
   }
 
   const pacienteColumns: TableColumn<PacienteListRecord>[] = [
@@ -340,15 +398,20 @@ export default function PacientesAmbulatorioCrudPage() {
         open={selectedPatient !== null}
         onClose={closeDetailsModal}
         title="Visualizar paciente"
-        subtitle="Consulta em modo leitura do cadastro selecionado."
+        subtitle="Consulte e atualize os dados clínicos do cadastro selecionado."
         intentVisible={false}
         size={isCompactLayout ? 'full' : 'lg'}
         intent="view"
         className="boname-page__record-modal"
         footer={
-          <Button appearance="primary" onClick={closeDetailsModal}>
-            Fechar
-          </Button>
+          <HStack spacing={8} justifyContent="flex-end">
+            <Button appearance="subtle" onClick={closeDetailsModal} disabled={salvarPacienteMutation.isPending}>
+              Fechar
+            </Button>
+            <Button appearance="primary" onClick={() => void handleSavePatient()} loading={salvarPacienteMutation.isPending}>
+              Salvar
+            </Button>
+          </HStack>
         }
       >
         {pacienteDetalheQuery.isLoading ? (
@@ -448,6 +511,28 @@ export default function PacientesAmbulatorioCrudPage() {
                     className="boname-page__control"
                     value={formatText(pacienteDetalheQuery.data.telefone)}
                     disabled
+                  />
+                </div>
+
+                <div className="boname-page__field">
+                  <label htmlFor="paciente-peso">Peso</label>
+                  <Input
+                    id="paciente-peso"
+                    size="sm"
+                    className="boname-page__control"
+                    value={pesoDraft ?? (pacienteDetalheQuery.data.peso === null ? '' : String(pacienteDetalheQuery.data.peso))}
+                    onChange={setPesoDraft}
+                  />
+                </div>
+
+                <div className="boname-page__field">
+                  <label htmlFor="paciente-coagweb-codigo">Código Coagweb</label>
+                  <Input
+                    id="paciente-coagweb-codigo"
+                    size="sm"
+                    className="boname-page__control"
+                    value={coagwebCodigoDraft ?? pacienteDetalheQuery.data.coagweb_codigo ?? ''}
+                    onChange={setCoagwebCodigoDraft}
                   />
                 </div>
 

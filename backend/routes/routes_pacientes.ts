@@ -6,5 +6,6 @@ router.use(authMiddleware);
 
 router.get('/listar_pacientes/:pesq',Controller_Pacientes.ListarPacientes);
 router.get('/visualizar_paciente/:num_paciente',Controller_Pacientes.VisualizarPaciente)
+router.put('/salvar_paciente/:num_paciente',Controller_Pacientes.SalvarPaciente);
 
 export default router;
