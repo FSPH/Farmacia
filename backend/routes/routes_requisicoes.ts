@@ -4,7 +4,7 @@ import authMiddleware from '../middleware/auth.js';
 const router = Router();
 router.use(authMiddleware);
 
-router.get('/listar/:dat_ini/:dat_fim/:dep_id', Controller_Requisicoes.Listar);
+router.get('/listar/:dat_ini/:dat_fim/:dep_id/:pesq', Controller_Requisicoes.Listar);
 router.get('/buscar/:req_id', Controller_Requisicoes.Buscar);
 router.get('/naoaprovadas', Controller_Requisicoes.ListarRequisicoesNaoAprovadas);
 router.get('/imprimir/:req_id', Controller_Requisicoes.Imprimir);
