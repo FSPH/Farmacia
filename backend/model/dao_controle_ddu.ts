@@ -60,10 +60,12 @@ export default class ControleDdu extends BaseModel implements iControleDduFields
                               AND ddu.cdd_status = :cdd_status`;
 
         if (pesq !== '*') {
-            query += ` AND (MATCH(pac.nom_paciente,pac.nom_social,pac.cpf) AGAINST(CONCAT("*",:pesq,"*") IN BOOLEAN MODE))`;
+            query += ` AND (MATCH(pac.nom_paciente,pac.nom_social,pac.cpf) AGAINST(:pesq IN BOOLEAN MODE))`;
         }
 
-        const [rows] = await this.ExecuteQuery(query, { data_ini, data_fin, pesq, cdd_status }) as RowDataPacket[];
+        const termoFormatado = pesq.trim().replace(/[+\-><()~*\"@]+/g, ' ').split(/\s+/).filter(palavra => palavra.length >= 3).map(palavra => `+${palavra}*`).join(' ');
+
+        const [rows] = await this.ExecuteQuery(query, { data_ini, data_fin, pesq: termoFormatado, cdd_status }) as RowDataPacket[];
 
         return rows as RowDataPacket[];
 

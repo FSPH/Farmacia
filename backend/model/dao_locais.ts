@@ -51,10 +51,12 @@ export default class Locais extends BaseModel implements iBaseModel, iLocaisFiel
         let query: string = "SELECT * FROM tb_locais";
 
         if (pesq !== '*') {
-            query += " WHERE MATCH(local_descr) AGAINST(:pesq IN NATURAL LANGUAGE MODE)";
+            query += " WHERE MATCH(local_descr) AGAINST(:pesq IN BOOLEAN MODE)";
         }
 
-        const [rows] = await this.ExecuteQuery(query, { pesq: `%${pesq}%` }) as [iLocaisFields[]];
+        const termoFormatado = pesq.trim().replace(/[+\-><()~*\"@]+/g, ' ').split(/\s+/).filter(palavra => palavra.length >= 3).map(palavra => `+${palavra}*`).join(' ');
+
+        const [rows] = await this.ExecuteQuery(query, { pesq: termoFormatado }) as [iLocaisFields[]];
 
         return rows;
 
@@ -65,10 +67,12 @@ export default class Locais extends BaseModel implements iBaseModel, iLocaisFiel
         let query: string = "SELECT * FROM tb_locais WHERE local_ativo = 1";
 
         if (pesq !== '*') {
-            query += " AND MATCH(local_descr) AGAINST(:pesq IN NATURAL LANGUAGE MODE)";
+            query += " AND MATCH(local_descr) AGAINST(:pesq IN BOOLEAN MODE)";
         }
 
-        const [rows] = await this.ExecuteQuery(query, { pesq }) as [iLocaisFields[]];
+        const termoFormatado = pesq.trim().replace(/[+\-><()~*\"@]+/g, ' ').split(/\s+/).filter(palavra => palavra.length >= 3).map(palavra => `+${palavra}*`).join(' ');
+
+        const [rows] = await this.ExecuteQuery(query, { pesq: termoFormatado }) as [iLocaisFields[]];
 
         return rows;
 

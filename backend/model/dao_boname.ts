@@ -58,10 +58,12 @@ export default class Boname extends BaseModel implements iBonameFields, iBaseMod
         let query: string = `SELECT * FROM tb_boname`;
 
         if (pesq !== '*') {
-            query += ` WHERE MATCH(bona_descr,bona_codigo) AGAINST(CONCAT("*",:pesq,"*") IN BOOLEAN MODE)`;
+            query += ` WHERE MATCH(bona_descr,bona_codigo) AGAINST(:pesq IN BOOLEAN MODE)`;
         }
 
-        const [rows] = await this.ExecuteQuery(query, { pesq }) as RowDataPacket[];
+        const termoFormatado = pesq.trim().replace(/[+\-><()~*\"@]+/g, ' ').split(/\s+/).filter(palavra => palavra.length >= 3).map(palavra => `+${palavra}*`).join(' ');
+
+        const [rows] = await this.ExecuteQuery(query, { pesq: termoFormatado }) as RowDataPacket[];
 
         return rows as iBonameFields[];
     }
@@ -71,10 +73,12 @@ export default class Boname extends BaseModel implements iBonameFields, iBaseMod
         let query: string = `SELECT * FROM tb_boname WHERE bona_ativo = 1`;
 
         if (pesq !== '*') {
-            query += ` AND MATCH(bona_descr,bona_codigo) AGAINST(CONCAT("*",:pesq,"*") IN BOOLEAN MODE)`;
+            query += ` AND MATCH(bona_descr,bona_codigo) AGAINST(:pesq IN BOOLEAN MODE)`;
         }
 
-        const [rows] = await this.ExecuteQuery(query, { pesq }) as RowDataPacket[];
+        const termoFormatado = pesq.trim().replace(/[+\-><()~*\"@]+/g, ' ').split(/\s+/).filter(palavra => palavra.length >= 3).map(palavra => `+${palavra}*`).join(' ');
+
+        const [rows] = await this.ExecuteQuery(query, { pesq: termoFormatado }) as RowDataPacket[];
 
         return rows as iBonameFields[];
     }
@@ -95,7 +99,9 @@ export default class Boname extends BaseModel implements iBonameFields, iBaseMod
 
         query += " ORDER BY b.bona_ativo DESC, b.bona_descr ASC";
 
-        const [rows] = await this.ExecuteQuery(query, { pesq }) as RowDataPacket[];
+        const termoFormatado = pesq.trim().replace(/[+\-><()~*\"@]+/g, ' ').split(/\s+/).filter(palavra => palavra.length >= 3).map(palavra => `+${palavra}*`).join(' ');
+
+        const [rows] = await this.ExecuteQuery(query, { pesq: termoFormatado }) as RowDataPacket[];
 
         return rows as iBonamePrintFields[];
     }

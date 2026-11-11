@@ -106,15 +106,17 @@ export default class Entradas extends BaseModel implements iEntradaFields, iBase
 
             query += ` AND (
                 e.ent_doc LIKE CONCAT('%', :pesq, '%') OR
-                MATCH(f.for_razao_social,f.for_nome_fantasia) AGAINST(CONCAT('%', :pesq, '%') IN BOOLEAN MODE)
+                MATCH(f.for_razao_social,f.for_nome_fantasia) AGAINST(:pesq IN BOOLEAN MODE)
             )`;
         }
 
         query += `
             ORDER BY e.ent_id DESC`;
 
+        const termoFormatado = pesq.trim().replace(/[+\-><()~*\"@]+/g, ' ').split(/\s+/).filter(palavra => palavra.length >= 3).map(palavra => `+${palavra}*`).join(' ');
+
         const [rows] = await this.ExecuteQuery(query, {
-            pesq,
+            pesq: termoFormatado,
             data_inicio,
             data_fim
         });

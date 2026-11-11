@@ -72,11 +72,13 @@ export default class Estoque extends BaseModel implements iEstoqueFields, iBaseM
                 AND m.med_tipo_codigo = :med_tipo_codigo`
 
     if (pesq !== '*') {
-      query += ` AND ( MATCH(m.med_descr, m.med_descr_coml) AGAINST(CONCAT(:pesq, '*') IN BOOLEAN MODE) ) OR 
-                      ( MATCH(e.est_lote) AGAINST(CONCAT(:pesq, '*') IN BOOLEAN MODE) )`
+      query += ` AND ( MATCH(m.med_descr, m.med_descr_coml) AGAINST(:pesq IN BOOLEAN MODE) ) OR 
+                      ( MATCH(e.est_lote) AGAINST(:pesq IN BOOLEAN MODE) )`
     }
 
-    const [rows] = await this.ExecuteQuery(query, { dep_id, med_tipo_codigo, pesq }) as [RowDataPacket[]]
+    const termoFormatado = pesq.trim().replace(/[+\-><()~*\"@]+/g, ' ').split(/\s+/).filter(palavra => palavra.length >= 3).map(palavra => `+${palavra}*`).join(' ');
+
+    const [rows] = await this.ExecuteQuery(query, { dep_id, med_tipo_codigo, pesq: termoFormatado }) as [RowDataPacket[]]
 
     return rows as RowDataPacket[]
   }
