@@ -5,6 +5,7 @@ import { Table, type TableColumn } from '../../components/Table'
 import { DataState, PageSection, StatusBadge } from '../../components/ui'
 import { getErrorMessage } from '../../hooks/useMessage'
 import { apiRequest } from '../../lib/api'
+import { formatDateForDisplay as formatCalendarDateForDisplay } from '../../lib/date'
 import '../boname/BonameCrudPage.css'
 import './AlertaValidadePage.css'
 
@@ -28,25 +29,7 @@ export interface AlertaValidadePageProps {
 }
 
 function formatDateForDisplay(value: Date | string | null | undefined): string {
-  if (!value) {
-    return '-'
-  }
-
-  if (typeof value === 'string') {
-    const datePart = value.match(/^(\d{4})-(\d{2})-(\d{2})/)
-
-    if (datePart) {
-      return `${datePart[3]}/${datePart[2]}/${datePart[1]}`
-    }
-  }
-
-  const parsedDate = value instanceof Date ? value : new Date(value)
-
-  if (Number.isNaN(parsedDate.getTime())) {
-    return '-'
-  }
-
-  return parsedDate.toLocaleDateString('pt-BR')
+  return formatCalendarDateForDisplay(value)
 }
 
 function formatNumber(value: number | null | undefined): string {

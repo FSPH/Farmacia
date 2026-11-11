@@ -9,7 +9,7 @@ import { AppModal, DataState, PageSection, ReferenceNotification } from '../comp
 import { getErrorMessage, useMessage } from '../hooks/useMessage'
 import { useMask } from '../hooks/useMask'
 import { getApiBaseUrl } from '../lib/api-base-url'
-import { getSessionUsername } from '../lib/auth-helpers'
+import { formatDateForDisplay } from '../lib/date'
 import './boname/BonameCrudPage.css'
 
 type DraftItemForm = {
@@ -119,7 +119,7 @@ function formatDateForInput(date: Date): string {
 }
 
 function formatDate(value: Date | null) {
-  return value ? value.toLocaleDateString('pt-BR') : '-'
+  return formatDateForDisplay(value)
 }
 
 function normalizeText(value: string, maxLength: number): string {
