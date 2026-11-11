@@ -48,8 +48,8 @@ export default defineConfig({
     outDir: 'dist'
   },
   server: {
-    host:'0.0.0.0',
-    port: 5160,
+    host: '0.0.0.0',
+    port: 8080,
     sourcemapIgnoreList(sourcePath) {
       return sourcePath.includes('node_modules')
     },

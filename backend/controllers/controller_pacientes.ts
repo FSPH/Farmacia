@@ -22,12 +22,15 @@ export default class Controller_Pacientes {
                                        FROM fsph_ambulatorio.tb_pacientes`;
 
                   if (pesq !== '*') {
-                        query += `  WHERE nom_paciente LIKE :pesq AND nom_social = :pesq AND cpf = :pesq`;
+                        query += `  WHERE MATCH(nom_paciente,nom_social,cpf) AGAINST(:pesq IN BOOLEAN MODE)`;
+
                   } else {
                         query += ` LIMIT 10`;
                   }
 
-                  const [result] = await db.connection.query(query, { pesq: "%" + pesq + "%" });
+                  const termoFormatado = pesq.trim().replace(/[+\-><()~*\"@]+/g, ' ').split(/\s+/).filter(palavra => palavra.length >= 3).map(palavra => `+${palavra}*`).join(' ');
+
+                  const [result] = await db.connection.query(query, { pesq: termoFormatado });
 
                   resdata.data = result;
 
