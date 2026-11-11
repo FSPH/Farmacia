@@ -38,10 +38,12 @@ export default class Diagnosticos extends BaseModel implements iDiagnosticosFiel
         let query: string = "SELECT * FROM tb_diagnosticos";
 
         if (pesq !== '*') {
-            query += ` WHERE MATCH(diag_descr) AGAINST(CONCAT("*",:pesq,"*") IN BOOLEAN MODE)`;
+            query += ` WHERE MATCH(diag_descr) AGAINST(:pesq IN BOOLEAN MODE)`;
         }
 
-        const [rows] = await this.ExecuteQuery(query, { pesq }) as RowDataPacket[];
+        const termoFormatado = pesq.trim().replace(/[+\-><()~*\"@]+/g, ' ').split(/\s+/).filter(palavra => palavra.length >= 3).map(palavra => `+${palavra}*`).join(' ');
+
+        const [rows] = await this.ExecuteQuery(query, { pesq: termoFormatado }) as RowDataPacket[];
 
         return rows as iDiagnosticosFields[];
 
@@ -52,10 +54,12 @@ export default class Diagnosticos extends BaseModel implements iDiagnosticosFiel
         let query: string = "SELECT * FROM tb_diagnosticos WHERE diag_ativo = 1";
 
         if (pesq !== '*') {
-            query += ` AND MATCH(diag_descr) AGAINST(CONCAT("*",:pesq,"*") IN BOOLEAN MODE)`;
+            query += ` AND MATCH(diag_descr) AGAINST(:pesq IN BOOLEAN MODE)`;
         }
 
-        const [rows] = await this.ExecuteQuery(query, { pesq }) as RowDataPacket[];
+        const termoFormatado = pesq.trim().replace(/[+\-><()~*\"@]+/g, ' ').split(/\s+/).filter(palavra => palavra.length >= 3).map(palavra => `+${palavra}*`).join(' ');
+
+        const [rows] = await this.ExecuteQuery(query, { pesq: termoFormatado }) as RowDataPacket[];
 
         return rows as iDiagnosticosFields[];
 
