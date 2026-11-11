@@ -1,7 +1,9 @@
 .app-table__container {
   height: 100%;
   min-height: 0;
-  overflow: hidden;
+  min-width: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
   width: 100%;
 }
 

@@ -402,8 +402,15 @@ const [headerErrors, setHeaderErrors] = useState<HeaderFormErrors>({})
       return
     }
 
-    if (draftItems.some((item) => item.medicamentoId === draftItemForm.medicamentoId && item.draftId !== draftItemForm.draftId)) {
-      message.warning('Medicamento duplicado', 'O mesmo medicamento nao pode ser repetido na mesma entrada.')
+    const itemLote = normalizeText(draftItemForm.lote, MAX_LOTE_LENGTH).trim().toLocaleUpperCase('pt-BR')
+
+    if (draftItems.some((item) => {
+      const draftLote = normalizeText(item.lote, MAX_LOTE_LENGTH).trim().toLocaleUpperCase('pt-BR')
+      return item.medicamentoId === draftItemForm.medicamentoId
+        && draftLote === itemLote
+        && item.draftId !== draftItemForm.draftId
+    })) {
+      message.warning('Item duplicado', 'O mesmo medicamento com o mesmo lote nao pode ser repetido na mesma entrada.')
       return
     }
 

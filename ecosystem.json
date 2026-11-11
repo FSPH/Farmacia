@@ -11,8 +11,8 @@
       "watch": false,
       "max_memory_restart": "512M",
       "env": {
-        "NODE_ENV": "production",
-        "PORT": "3005"
+        "NODE_ENV": "desenv",
+        "PORT": "3000"
       },
       "env_homolog": {
         "NODE_ENV": "production",

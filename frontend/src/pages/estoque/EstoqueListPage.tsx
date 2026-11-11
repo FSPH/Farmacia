@@ -120,18 +120,37 @@ function validateFilters(values: FilterValues): FilterErrors {
   return errors
 }
 
-function formatDateForDisplay(value: Date | string | null): string {
+function parseCalendarDate(value: Date | string | null): Date | null {
   if (!value) {
-    return '-'
+    return null
   }
 
-  const parsedDate = value instanceof Date ? value : new Date(value)
+  if (value instanceof Date) {
+    if (Number.isNaN(value.getTime())) {
+      return null
+    }
+
+    return new Date(value.getFullYear(), value.getMonth(), value.getDate())
+  }
+
+  const dateOnlyMatch = /^\d{4}-\d{2}-\d{2}/.test(value)
+  const parsedDate = dateOnlyMatch
+    ? new Date(Number(value.slice(0, 4)), Number(value.slice(5, 7)) - 1, Number(value.slice(8, 10)))
+    : new Date(value)
 
   if (Number.isNaN(parsedDate.getTime())) {
-    return '-'
+    return null
   }
 
-  return parsedDate.toLocaleDateString('pt-BR')
+  return dateOnlyMatch
+    ? parsedDate
+    : new Date(parsedDate.getFullYear(), parsedDate.getMonth(), parsedDate.getDate())
+}
+
+function formatDateForDisplay(value: Date | string | null): string {
+  const parsedDate = parseCalendarDate(value)
+
+  return parsedDate ? parsedDate.toLocaleDateString('pt-BR') : '-'
 }
 
 function resolveValidityBadge(
@@ -142,9 +161,9 @@ function resolveValidityBadge(
     return { label: 'Sem validade', tone: 'neutral' }
   }
 
-  const parsedDate = value instanceof Date ? value : new Date(value)
+  const parsedDate = parseCalendarDate(value)
 
-  if (Number.isNaN(parsedDate.getTime())) {
+  if (!parsedDate) {
     return { label: 'Sem validade', tone: 'neutral' }
   }
 
