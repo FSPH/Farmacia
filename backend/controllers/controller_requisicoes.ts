@@ -26,7 +26,7 @@ pdfMake.addVirtualFileSystem(pdfFonts);
 // Coordena requisicoes e o fluxo de aprovacao com impacto em estoque.
 export default class Controller_Requisicoes {
 
-    private static readonly PAGE_CONTENT_WIDTH = 547;
+    private static readonly PAGE_CONTENT_WIDTH = 547.28;
 
     private static async buildPdfBuffer(docDefinition: object): Promise<Buffer> {
         const pdfDocument = pdfMake.createPdf(docDefinition);
@@ -782,8 +782,6 @@ export default class Controller_Requisicoes {
                 throw error;
             }
 
-            await demandas.BuscarPorPaciente(Number(requisicoes.req_pac_id));
-
             const gerarDdu = settings.local_id === Number(requisicoes.req_local_id);
             const requisicao_dispensacao = requisicoes.req_tip_id !== settings.tipo_req_id_devolucao;
 
@@ -802,6 +800,8 @@ export default class Controller_Requisicoes {
 
                 }
             }
+
+            await demandas.BuscarPorPaciente(Number(requisicoes.req_pac_id));
 
             for (const item of itens) {
 
@@ -1099,6 +1099,8 @@ export default class Controller_Requisicoes {
             const numeroDocumentoMascarado = Controller_Requisicoes.formatRequisitionNumber(numeroDocumento) || numeroDocumento;
             const paciente = Controller_Requisicoes.formatText(requisicao.nom_paciente);
             const nomeUsual = Controller_Requisicoes.formatText(requisicao.nom_social, '');
+            const peso = Controller_Requisicoes.formatText(requisicao.peso);
+            const coagwebCodigo = Controller_Requisicoes.formatText(requisicao.coagweb_codigo);
             const observacao = Controller_Requisicoes.formatText(requisicao.req_observacao, '');
             const itemRows = itens.map((item) => [
                 { text: Controller_Requisicoes.formatText(item.ite_med_id, ''), style: 'tableCellCenter' },
@@ -1135,6 +1137,7 @@ export default class Controller_Requisicoes {
             ];
 
             const signatureBlock = {
+                unbreakable: true,
                 margin: [0, 8, 0, 0],
                 table: {
                     widths: ['*', '*'],
@@ -1236,6 +1239,7 @@ export default class Controller_Requisicoes {
                                                 { text: 'Paciente', style: 'headerFlowLabel' },
                                                 { text: paciente, style: 'headerFlowValue', margin: [0, 4, 0, 0] },
                                                 nomeUsual ? { text: `Nome usual: ${nomeUsual}`, style: 'headerFlowMuted', margin: [0, 3, 0, 0] } : { text: '', style: 'headerFlowMuted' },
+                                                { text: `Peso: ${Controller_Requisicoes.formatText(requisicao.peso)} | CoagWeb: ${Controller_Requisicoes.formatText(requisicao.coagweb_codigo)}`, style: 'headerFlowMuted', margin: [0, 3, 0, 0] },
                                             ],
                                         },
                                         {
@@ -1280,40 +1284,86 @@ export default class Controller_Requisicoes {
                 content: [
                     {
                         margin: [0, 0, 0, 12],
-                        table: {
-                            widths: [263, 104, 104],
-                            body: [[
-                                {
-                                    stack: [
-                                        { text: 'Nome do paciente', style: 'sectionLabel' },
-                                        { text: paciente, style: 'metaValue', margin: [0, 5, 0, 0] },
+                        stack: [
+                            {
+                                table: {
+                                    widths: [
+                                        Controller_Requisicoes.PAGE_CONTENT_WIDTH * 0.75,
+                                        Controller_Requisicoes.PAGE_CONTENT_WIDTH * 0.25,
                                     ],
+                                    body: [[
+                                        {
+                                            margin: [12, 0, 12, 0],
+                                            stack: [
+                                                { text: 'Nome do paciente', style: 'sectionLabel' },
+                                                { text: paciente, style: 'metaValue', margin: [0, 5, 0, 0] },
+                                            ],
+                                        },
+                                        {
+                                            margin: [12, 0, 12, 0],
+                                            stack: [
+                                                { text: 'Data da requisicao', style: 'sectionLabel' },
+                                                { text: Controller_Requisicoes.formatDate(requisicao.req_date), style: 'metaValue', margin: [0, 5, 0, 0] },
+                                            ],
+                                        },
+                                    ]],
                                 },
-                                {
-                                    stack: [
-                                        { text: 'Data da requisicao', style: 'sectionLabel' },
-                                        { text: Controller_Requisicoes.formatDate(requisicao.req_date), style: 'metaValue', margin: [0, 5, 0, 0] },
+                                layout: {
+                                    fillColor: () => '#ffffff',
+                                    hLineWidth: () => 1,
+                                    vLineWidth: () => 1,
+                                    hLineColor: () => '#dce7ef',
+                                    vLineColor: () => '#dce7ef',
+                                    paddingLeft: () => 0,
+                                    paddingRight: () => 0,
+                                    paddingTop: () => 8,
+                                    paddingBottom: () => 10,
+                                },
+                            },
+                            {
+                                table: {
+                                    widths: [
+                                        Controller_Requisicoes.PAGE_CONTENT_WIDTH / 3,
+                                        Controller_Requisicoes.PAGE_CONTENT_WIDTH / 3,
+                                        Controller_Requisicoes.PAGE_CONTENT_WIDTH - (Controller_Requisicoes.PAGE_CONTENT_WIDTH / 3) * 2,
                                     ],
+                                    body: [[
+                                        {
+                                            margin: [12, 0, 12, 0],
+                                            stack: [
+                                                { text: 'Numero da requisicao', style: 'sectionLabel' },
+                                                { text: numeroDocumentoMascarado, style: 'metaValueSmall', margin: [0, 5, 0, 0] },
+                                            ],
+                                        },
+                                        {
+                                            margin: [12, 0, 12, 0],
+                                            stack: [
+                                                { text: 'Peso', style: 'sectionLabel' },
+                                                { text: peso, style: 'metaValueSmall', margin: [0, 5, 0, 0] },
+                                            ],
+                                        },
+                                        {
+                                            margin: [12, 0, 12, 0],
+                                            stack: [
+                                                { text: 'CoagWeb código', style: 'sectionLabel' },
+                                                { text: coagwebCodigo, style: 'metaValueSmall', margin: [0, 5, 0, 0] },
+                                            ],
+                                        },
+                                    ]],
                                 },
-                                {
-                                    stack: [
-                                        { text: 'Numero da requisicao', style: 'sectionLabel' },
-                                        { text: numeroDocumentoMascarado, style: 'metaValueSmall', margin: [0, 5, 0, 0] },
-                                    ],
+                                layout: {
+                                    fillColor: () => '#ffffff',
+                                    hLineWidth: () => 1,
+                                    vLineWidth: () => 1,
+                                    hLineColor: () => '#dce7ef',
+                                    vLineColor: () => '#dce7ef',
+                                    paddingLeft: () => 0,
+                                    paddingRight: () => 0,
+                                    paddingTop: () => 8,
+                                    paddingBottom: () => 10,
                                 },
-                            ]],
-                        },
-                        layout: {
-                            fillColor: () => '#ffffff',
-                            hLineWidth: () => 1,
-                            vLineWidth: () => 1,
-                            hLineColor: () => '#dce7ef',
-                            vLineColor: () => '#dce7ef',
-                            paddingLeft: () => 12,
-                            paddingRight: () => 12,
-                            paddingTop: () => 8,
-                            paddingBottom: () => 10,
-                        },
+                            },
+                        ],
                     },
                     {
                         table: {
@@ -1342,15 +1392,15 @@ export default class Controller_Requisicoes {
                         },
                     },
                     {
-                        margin: [0, 10, 0, 0],
+                        margin: [0, 6, 0, 0],
                         table: {
                             widths: ['*'],
-                            heights: () => 100,
+                            heights: () => 56,
                             body: [[
                                 {
                                     stack: [
                                         { text: 'Observacao', style: 'sectionLabel' },
-                                        { text: Controller_Requisicoes.formatText(observacao, '-'), style: 'bodyText', margin: [0, 6, 0, 0] },
+                                        { text: Controller_Requisicoes.formatText(observacao, '-'), style: 'bodyText', margin: [0, 4, 0, 0] },
                                     ],
                                 },
                             ]],
@@ -1361,10 +1411,10 @@ export default class Controller_Requisicoes {
                             vLineWidth: () => 1,
                             hLineColor: () => '#dce7ef',
                             vLineColor: () => '#dce7ef',
-                            paddingLeft: () => 14,
-                            paddingRight: () => 14,
-                            paddingTop: () => 10,
-                            paddingBottom: () => 10,
+                            paddingLeft: () => 12,
+                            paddingRight: () => 12,
+                            paddingTop: () => 6,
+                            paddingBottom: () => 6,
                         },
                     },
                     signatureBlock,
@@ -1629,10 +1679,7 @@ export default class Controller_Requisicoes {
             }
 
             // Busca todas as informações de um lote
-            const query = `
-                SELECT * from vw_rastreamento_lote
-                WHERE est_lote = :ent_lote;
-            `;
+            const query = `SELECT * from vw_rastreamento_lote WHERE est_lote = :ent_lote;`;
 
             const [rows] = await db.connection.query(query, { ent_lote: lote }) as RowDataPacket[];
 

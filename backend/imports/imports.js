@@ -1,13 +1,13 @@
 import {createConnection} from 'mysql2/promise';
-import json from './tabItInventario.json' with { type: 'json' };
+import json from './tabEstoque.json' with { type: 'json' };
 import 'dotenv/config';
 
 const connection = await createConnection({
-    host: process.env.DB_HOST,
-    port: Number(process.env.DB_PORT || 3306),
-    user: process.env.DB_USER,
-    password: process.env.DB_PASS,
-    database: process.env.DB_FARMACIA || 'fsph_ambulatorio',
+    host:  '172.28.64.92', //process.env.DB_HOST,
+    port: 3306, // Number(process.env.DB_PORT || 3306),
+    user: 'fsph', //process.env.DB_USER,
+    password:'bTQePUPf6FdVqfF5', //process.env.DB_PASS,
+    database: 'fsph_ambulatorio',
     namedPlaceholders: true,
     decimalNumbers: true,
     dateStrings: true
@@ -25,25 +25,24 @@ const connection = await createConnection({
 
         for (const item of json) {
             
-            ++i;
+            i++;
 
-            const query = `INSERT INTO tb_itens_inventario SET 
-                iti_id = :iti_id,
-                iti_inv_id = :iti_inv_id,
-                iti_med_id = :iti_med_id,
-                iti_lote = :iti_lote,
-                iti_validade = :iti_validade,
-                iti_qtde_estoque = :iti_qtde_estoque,
-                iti_qtde_invent = :iti_qtde_invent`;
+            const query = `INSERT INTO tb_estoque SET
+                est_id = :id, 
+                est_dep_id = :dep_id,
+                est_med_id = :med_id,
+                est_lote = :lote,
+                est_saldo_disponivel = :saldo,
+                est_validade = :validade`;
             
             await connection.execute(query, {
-                iti_id: i,
-                iti_inv_id: item.NumInv,
-                iti_med_id: item.CodProd,
-                iti_lote: item.Lote,
-                iti_validade: null,
-                iti_qtde_estoque: item.QtdeEstq,
-                iti_qtde_invent: item.QtdeInv,
+                id: i,
+                dep_id: item.CodDep,
+                med_id: item.codigo,
+                saldo: item.Saldo,
+                lote: item.Lote,
+                validade: item.DataValidade,
+                
             });
 
             console.log(`${i} de ${json.length} inseridos com sucesso`);

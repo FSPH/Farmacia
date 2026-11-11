@@ -1,6 +1,6 @@
 import Database, { iDatabase } from "../connections/dbconn.js";
 import Depositos from "../model/dao_depositos.js";
-import Inventarios, { eStatus } from "../model/dao_inventarios.js";
+import Inventarios, { eStatus, eTipo } from "../model/dao_inventarios.js";
 import ItensInventario, { iItensInventarioFields } from "../model/dao_itens_inventario.js";
 import Medicamentos from "../model/dao_medicamentos.js";
 import { iresdata } from "./interface_controllers.js";
@@ -137,7 +137,7 @@ export default class Controller_Inventarios {
             const inv_date: string = String(req.body.inv_date ?? '');
             const dep_id: number = Number(req.body.dep_id ?? 0);
             const med_tipo_codigo: string = String(req.body.med_tipo_codigo ?? '');
-            const inv_tipo: string = String(req.body.inv_tipo || 'Parcial' || 'Total');
+            const inv_tipo: eTipo = (req.body.inv_tipo as eTipo);
 
             //valida os campos de itens de inventario
             const itens: iItensInventarioFields[] = req.body.itens ?? [];
@@ -167,7 +167,7 @@ export default class Controller_Inventarios {
                 throw error;
             }
 
-            if (inv_tipo !== 'Parcial' && inv_tipo !== 'Total') {
+            if (Object.values(eTipo).includes(inv_tipo)) {
                 const error = new Error('Tipo de inventário inválido.');
                 error.statusCode = 400;
                 throw error;
@@ -178,6 +178,14 @@ export default class Controller_Inventarios {
             const medicamentos = new Medicamentos(db.connection);
             const itens_inventarios = new ItensInventario(db.connection);
             const depositos = new Depositos(db.connection);
+
+            const dateinv = new Date(inv_date);
+
+            if (await inventarios.CheckInventarioExist(dep_id, dateinv.getFullYear(), dateinv.getMonth() + 1, med_tipo_codigo)) {
+                const error = new Error('Já existe um inventario total para este mes.') as any;
+                error.statusCode = 403;
+                throw error;
+            }
 
             //busca o depósito
             await depositos.BuscarPorId(dep_id);

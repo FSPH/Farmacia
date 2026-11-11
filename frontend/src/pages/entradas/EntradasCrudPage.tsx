@@ -683,8 +683,13 @@ export function EntradasCrudPage({
       return
     }
 
-    if (draftItems.some((item) => item.ent_med_id === itemValues.ent_med_id)) {
-      message.warning('Medicamento duplicado', 'O mesmo medicamento nao pode ser repetido na mesma entrada.')
+    const itemLote = normalizeText(itemValues.ent_lote, MAX_LOTE_LENGTH).trim().toLocaleUpperCase('pt-BR')
+
+    if (draftItems.some((item) => {
+      const draftLote = normalizeText(item.ent_lote, MAX_LOTE_LENGTH).trim().toLocaleUpperCase('pt-BR')
+      return item.ent_med_id === itemValues.ent_med_id && draftLote === itemLote
+    })) {
+      message.warning('Item duplicado', 'O mesmo medicamento com o mesmo lote nao pode ser repetido na mesma entrada.')
       return
     }
 
