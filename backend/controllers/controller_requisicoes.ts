@@ -104,12 +104,16 @@ export default class Controller_Requisicoes {
             const dat_ini = String(req.params.dat_ini);
             const dat_fim = String(req.params.dat_fim);
             const dep_id = Number(req.params.dep_id || 0);
+            let pesq = String(req.params.pesq || '');
+
 
             if (!dat_ini || !dat_fim) {
                 const error = new Error('Datas não informadas') as any;
                 error.statusCode = 400;
                 throw error;
             }
+
+            pesq = pesq.length == 0 ? '' : pesq;
 
             const depostos = new Depositos(db.connection);
             const requisicoes = new Requisicoes(db.connection);
@@ -122,7 +126,7 @@ export default class Controller_Requisicoes {
                 throw error;
             }
 
-            const result = await requisicoes.ListarPorPeriodo(dat_ini, dat_fim, dep_id);
+            const result = await requisicoes.ListarPorPeriodo(dat_ini, dat_fim, dep_id, pesq);
 
             resdata.data = result;
 

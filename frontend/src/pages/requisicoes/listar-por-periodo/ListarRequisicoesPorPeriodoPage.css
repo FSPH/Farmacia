@@ -1,5 +1,5 @@
 .listar-requisicoes-periodo-page__filters-grid {
-  grid-template-columns: minmax(12rem, 0.8fr) minmax(12rem, 0.8fr) minmax(16rem, 1.2fr) auto;
+  grid-template-columns: minmax(8.5rem, 0.6fr) minmax(8.5rem, 0.6fr) minmax(11rem, 0.8fr) minmax(20rem, 2fr) auto;
   align-items: start;
   gap: 1rem;
   padding-bottom: 0.35rem;

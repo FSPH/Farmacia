@@ -117,11 +117,12 @@ export default class Requisicoes extends BaseModel implements iRequisicoesFields
     set req_num_devolucao(num_devolucao: string | null) { this._fields.req_num_devolucao = num_devolucao }
     get req_num_devolucao(): string | null { return this._fields.req_num_devolucao }
 
-    public async ListarPorPeriodo(dat_ini: string | Date, dat_fim: string | Date, dep_id: number): Promise<RowDataPacket[]> {
+    public async ListarPorPeriodo(dat_ini: string | Date, dat_fim: string | Date, dep_id: number, pesq: string): Promise<RowDataPacket[]> {
 
-        const query: string = `SELECT * FROM vw_requisicoes WHERE data >= :dat_ini AND data <= :dat_fim AND req_dep_id = :dep_id AND status IN (1,3)`;
+        const query: string = `SELECT * FROM vw_requisicoes 
+        WHERE data >= :dat_ini AND data <= :dat_fim AND req_dep_id = :dep_id AND status IN (1,3) AND paciente LIKE :pesq`;
 
-        const [rows] = await this.ExecuteQuery(query, { dat_ini, dat_fim, dep_id }) as RowDataPacket[];
+        const [rows] = await this.ExecuteQuery(query, { dat_ini, dat_fim, dep_id, pesq: '%' + pesq + '%' }) as RowDataPacket[];
 
         return rows as RowDataPacket[];
 
