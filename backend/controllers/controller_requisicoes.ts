@@ -337,7 +337,6 @@ export default class Controller_Requisicoes {
             const locais = new Locais(db.connection);
             const depositos = new Depositos(db.connection);
             const medicamentos = new Medicamentos(db.connection);
-            const estoques = new Estoque(db.connection);
             const demandas = new DemandasEspecificas(db.connection);
             const itens_demandas = new ItensDemandasEspecificas(db.connection);
             const geraNumeroReq = new GeraNumeroReq();
@@ -443,24 +442,27 @@ export default class Controller_Requisicoes {
                     throw error;
                 }
 
-                await estoques.BuscarPorItemEstoque(dep_id, Number(item.med_id || 0), item.lote);
+                const estoqueItem = new Estoque(db.connection);
+                await estoqueItem.BuscarPorItemEstoque(dep_id, Number(item.med_id || 0), item.lote);
 
-                if (!estoques.found) {
+                if (!estoqueItem.found) {
                     const error = new Error(`Item ${medicamentos.med_descr} com lote ${item.lote},\n 
                         não encontrado no estoque do depósito ${depositos.dep_descr} `) as any;
                     error.statusCode = 404;
                     throw error;
                 }
 
-                if ((estoques.est_saldo_disponivel || 0) < quantidadeItem) {
+                const saldoDisponivel = Number(estoqueItem.est_saldo_disponivel ?? 0);
+
+                if (!Number.isFinite(saldoDisponivel) || saldoDisponivel < quantidadeItem) {
                     const error = new Error(`Quantidade solicitada maior que a quantidade disponível \n 
-                        Medicamento: ${medicamentos.med_descr} \n Lote: ${item.lote} \n Quantidade solicitada: ${item.qtde} \n 
-                        Quantidade disponível: ${estoques.est_saldo_disponivel}`) as any;
+                        Medicamento: ${medicamentos.med_descr} \n Lote: ${item.lote} \n Quantidade solicitada: ${quantidadeItem}\n
+                        Quantidade disponível: ${saldoDisponivel}`) as any;
                     error.statusCode = 400;
                     throw error;
                 }
 
-                if (pac_id > 0 && demandas.found) {
+                if (pac_id > 0 && demandas.found && settings.demandas.some((demanda) => demanda.value == medicamentos.med_tipo_codigo)) {
 
                     const item_demanda = await itens_demandas.BuscaItemDemanda(Number(demandas.dem_id), Number(item.med_id))
 
