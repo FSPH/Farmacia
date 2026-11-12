@@ -25,6 +25,7 @@ export async function apiRequest<T>(path: string, init?: RequestInit) {
   const response = await fetch(`${API_BASE_URL}${path}`, {
     ...init,
     credentials: init?.credentials ?? 'include',
+    cache: init?.cache ?? 'no-store',
     headers,
   })
 
