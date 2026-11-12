@@ -69,6 +69,7 @@ interface FilterValues {
   dataFinal: string
   dataInicial: string
   depositoId: number | null
+  pesquisa: string
 }
 
 type FilterErrors = Partial<Record<keyof FilterValues, string>>
@@ -121,6 +122,7 @@ function getDefaultFilters(): FilterValues {
     dataFinal: formatDateForInput(new Date()),
     dataInicial: getFirstDayOfCurrentMonth(),
     depositoId: null,
+    pesquisa: '',
   }
 }
 
@@ -214,9 +216,11 @@ async function listarRequisicoesPeriodo(
   filters: FilterValues,
   authToken?: string | null,
 ): Promise<RequisicaoPeriodoRecord[]> {
+  const pesquisa = filters.pesquisa?.trim() || '%'
+
   return requestRequisicoes<RequisicaoPeriodoRecord[]>(
     baseUrl,
-    `/requisicoes/listar/${encodeURIComponent(formatDateForPath(filters.dataInicial))}/${encodeURIComponent(formatDateForPath(filters.dataFinal))}/${filters.depositoId ?? 0}`,
+    `/requisicoes/listar/${encodeURIComponent(formatDateForPath(filters.dataInicial))}/${encodeURIComponent(formatDateForPath(filters.dataFinal))}/${filters.depositoId ?? 0}/${encodeURIComponent(pesquisa)}`,
     { method: 'GET' },
     authToken,
   )
@@ -500,6 +504,19 @@ export function ListarRequisicoesPorPeriodoPage({
               }}
             />
             {filterErrors.depositoId ? <span role="alert">{filterErrors.depositoId}</span> : null}
+          </div>
+
+          <div className="boname-page__field estoque-page__filter-field">
+            <label htmlFor="listar-requisicoes-periodo-pesquisa">Pesquisa</label>
+            <Input
+              id="listar-requisicoes-periodo-pesquisa"
+              size="sm"
+              className="boname-page__control"
+              placeholder="Paciente ou requisicao"
+              value={filterValues.pesquisa}
+              onChange={(value) => setFilterValues((current) => ({ ...current, pesquisa: value }))}
+              onPressEnter={() => void handleSubmitFilters()}
+            />
           </div>
 
           <div className="boname-page__field estoque-page__actions-field">

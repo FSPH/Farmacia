@@ -13,6 +13,7 @@ import { Cell, Column, HeaderCell, Table } from '../../components/Table'
 import { AppModal, DataState, PageSection, StatusBadge } from '../../components/ui'
 import { getErrorMessage, useMessage } from '../../hooks/useMessage'
 import { getApiBaseUrl } from '../../lib/api-base-url'
+import { formatDateForDisplay as formatCalendarDateForDisplay } from '../../lib/date'
 import '../boname/BonameCrudPage.css'
 import '../estoque/ConsultaMovimentacoesPage.css'
 import './ListarInventariosPage.css'
@@ -108,8 +109,6 @@ export interface ListarInventariosPageProps {
 
 const LOCAL_STORAGE_TOKEN_KEYS = ['authToken', 'access_token', 'token', 'jwtToken']
 const PAGE_SIZE = 13
-const DATE_PREFIX_PATTERN = /^(\d{4})-(\d{2})-(\d{2})/
-
 function getEmptyNovoItemFormValues(): NovoItemFormValues {
   return {
     medDescr: '',
@@ -163,26 +162,7 @@ function getDefaultFilters(): FilterValues {
 }
 
 function formatDateForDisplay(value: Date | string | null): string {
-  if (!value) {
-    return '-'
-  }
-
-  if (typeof value === 'string') {
-    const dateParts = DATE_PREFIX_PATTERN.exec(value)
-
-    if (dateParts) {
-      const [, year, month, day] = dateParts
-      return `${day}/${month}/${year}`
-    }
-  }
-
-  const parsedDate = value instanceof Date ? value : new Date(value)
-
-  if (Number.isNaN(parsedDate.getTime())) {
-    return '-'
-  }
-
-  return parsedDate.toLocaleDateString('pt-BR')
+  return formatCalendarDateForDisplay(value)
 }
 
 function formatDateForPath(value: string): string {

@@ -1,4 +1,5 @@
 import { Children, isValidElement, type CSSProperties, type ReactNode, type TableHTMLAttributes } from 'react'
+import { formatDateForDisplay } from '../lib/date'
 import './Table.css'
 
 export type TableRow = object
@@ -225,7 +226,7 @@ function renderCellValue(value: unknown): ReactNode {
   }
 
   if (value instanceof Date) {
-    return value.toLocaleDateString('pt-BR')
+    return formatDateForDisplay(value)
   }
 
   return null

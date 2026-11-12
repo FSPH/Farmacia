@@ -471,7 +471,6 @@ export const NAVIGATION_GROUPS: NavigationGroup[] = [
     title: 'Cadastros',
     items: [
       {
-        badge: 'novo',
         eventKey: 'parametros/boname',
         icon: <RiBookletLine size={18} />,
         label: 'Boname',

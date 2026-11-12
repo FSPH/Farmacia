@@ -8,6 +8,7 @@ import { Cell, Column, HeaderCell, Table, type TableColumn } from '../../compone
 import { AppModal, DataState, PageSection, StatusBadge } from '../../components/ui'
 import { getErrorMessage, useMessage } from '../../hooks/useMessage'
 import { apiRequest } from '../../lib/api'
+import { formatDateForDisplay as formatCalendarDateForDisplay, formatDateTimeForDisplay as formatCalendarDateTimeForDisplay, parseCalendarDate } from '../../lib/date'
 import '../boname/BonameCrudPage.css'
 import './SolicitacoesEncerradasPage.css'
 
@@ -67,33 +68,11 @@ function getDefaultFilterValues(): FilterValues {
 }
 
 function formatDateForDisplay(value?: string | null): string {
-  if (!value) {
-    return '-'
-  }
-
-  const parsedDate = new Date(`${String(value).slice(0, 10)}T00:00:00`)
-
-  if (Number.isNaN(parsedDate.getTime())) {
-    return '-'
-  }
-
-  return parsedDate.toLocaleDateString('pt-BR')
+  return formatCalendarDateForDisplay(value)
 }
 
 function formatDateTimeForDisplay(value?: string | null): string {
-  if (!value) {
-    return '-'
-  }
-
-  const textValue = String(value).trim()
-  const dateTimeMatch = textValue.match(/^(\d{4})-(\d{2})-(\d{2})(?:[T\s](\d{2}):(\d{2})(?::(\d{2}))?)?/)
-
-  if (dateTimeMatch) {
-    const [, year, month, day, hour = '00', minute = '00', second = '00'] = dateTimeMatch
-    return `${day}/${month}/${year}, ${hour}:${minute}:${second}`
-  }
-
-  return formatDateForDisplay(value)
+  return formatCalendarDateTimeForDisplay(value)
 }
 
 function formatNumber(value?: number | null): string {
@@ -139,18 +118,22 @@ function validateFilters(values: FilterValues): FilterErrors {
     return errors
   }
 
-  const initialDate = new Date(values.dataInicial)
-  const finalDate = new Date(values.dataFinal)
+  const initialDate = parseCalendarDate(values.dataInicial)
+  const finalDate = parseCalendarDate(values.dataFinal)
 
-  if (Number.isNaN(initialDate.getTime())) {
+  if (!initialDate) {
     errors.dataInicial = 'Data inicial invalida.'
   }
 
-  if (Number.isNaN(finalDate.getTime())) {
+  if (!finalDate) {
     errors.dataFinal = 'Data final invalida.'
   }
 
   if (errors.dataInicial || errors.dataFinal) {
+    return errors
+  }
+
+  if (!initialDate || !finalDate) {
     return errors
   }
 

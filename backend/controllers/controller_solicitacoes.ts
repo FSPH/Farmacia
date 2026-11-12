@@ -10,6 +10,7 @@ import { applyControllerError } from "../utils/controllerError.js";
 import { buildPdfBrandHeaderStack } from "../utils/pdfBrandHeader.js";
 import pdfMake from "pdfmake/build/pdfmake.js";
 import pdfFonts from "pdfmake/build/vfs_fonts.js";
+import { formatDatePtBr } from '../utils/date.js';
 
 pdfMake.addVirtualFileSystem(pdfFonts);
 
@@ -26,17 +27,7 @@ export default class Controller_Solicitacoes {
       }
 
       private static formatDate(value: Date | string | null): string {
-            if (!value) {
-                  return '';
-            }
-
-            const date = value instanceof Date ? value : new Date(value);
-
-            if (Number.isNaN(date.getTime())) {
-                  return '';
-            }
-
-            return date.toLocaleDateString('pt-BR', { timeZone: 'America/Maceio' });
+            return formatDatePtBr(value);
       }
 
       private static formatText(value: unknown, fallback = '-'): string {
@@ -223,9 +214,14 @@ export default class Controller_Solicitacoes {
                   }
 
                   const itens = await itensSolicitacoes.ListarItensParaImpressao(sol_id);
-                  const depositos = new Depositos(db.connection);
-                  const depositoOrigem = solicitacao.sol_dep_ori_id ? await depositos.BuscarPorId(Number(solicitacao.sol_dep_ori_id)) : null;
-                  const depositoDestino = solicitacao.sol_dep_des_id ? await depositos.BuscarPorId(Number(solicitacao.sol_dep_des_id)) : null;
+                  const depositoOrigemModel = new Depositos(db.connection);
+                  const depositoDestinoModel = new Depositos(db.connection);
+                  const depositoOrigem = solicitacao.sol_dep_ori_id
+                        ? await depositoOrigemModel.BuscarPorId(Number(solicitacao.sol_dep_ori_id))
+                        : null;
+                  const depositoDestino = solicitacao.sol_dep_des_id
+                        ? await depositoDestinoModel.BuscarPorId(Number(solicitacao.sol_dep_des_id))
+                        : null;
 
                   const itemRows: Array<Array<Record<string, unknown>>> = itens.map((item) => {
                         return [
@@ -239,7 +235,7 @@ export default class Controller_Solicitacoes {
                         ];
                   });
 
-                  const minimumPrintableRows = 16;
+                  const minimumPrintableRows = 14;
                   const dataSolicitacaoFormatada = Controller_Solicitacoes.formatText(
                         Controller_Solicitacoes.formatDate(solicitacao.sol_date),
                         '',
@@ -339,7 +335,7 @@ export default class Controller_Solicitacoes {
                               subject: 'Impressao de solicitacao',
                         },
                         pageSize: 'A4',
-                        pageMargins: [24, 132, 24, 28],
+                        pageMargins: [24, 165, 24, 28],
                         header: (currentPage: number, pageCount: number) => ({
                               margin: [24, 18, 24, 0],
                               stack: [
@@ -351,9 +347,9 @@ export default class Controller_Solicitacoes {
                                           subtitle: 'Documento operacional de movimentacao entre depositos',
                                     }),
                                     {
-                                          margin: [0, 10, 0, 0],
+                                          margin: [0, 4, 0, 0],
                                           table: {
-                                                widths: ['*', '*', '*'],
+                                                widths: ['*', '*', '*', '*'],
                                                 body: [
                                                       [
                                                             {
@@ -364,8 +360,14 @@ export default class Controller_Solicitacoes {
                                                             },
                                                             {
                                                                   stack: [
-                                                                        { text: 'Deposito', style: 'headerFlowLabel' },
+                                                                        { text: 'Deposito de origem', style: 'headerFlowLabel' },
                                                                         { text: depositoOrigemDescricao, style: 'headerFlowValue', margin: [0, 4, 0, 0] },
+                                                                  ],
+                                                            },
+                                                            {
+                                                                  stack: [
+                                                                        { text: 'Deposito de destino', style: 'headerFlowLabel' },
+                                                                        { text: depositoDestinoDescricao, style: 'headerFlowValue', margin: [0, 4, 0, 0] },
                                                                   ],
                                                             },
                                                             {

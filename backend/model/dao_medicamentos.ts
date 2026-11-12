@@ -88,14 +88,12 @@ export default class Medicamentos extends BaseModel implements iMedicamentosFiel
         let query: string = `SELECT * FROM tb_medicamentos`;
 
         if (pesq !== '*') {
-            query += ` WHERE (med_descr LIKE CONCAT('%',:pesq,'%'))
-                        OR (med_descr_coml LIKE CONCAT('%',:pesq,'%'))
-                        OR med_bona_codigo LIKE CONCAT('%',:pesq,'%')`;
+            query += ` WHERE (MATCH(med_descr,med_descr_coml) AGAINST(:pesq IN BOOLEAN MODE)) OR med_bona_codigo LIKE CONCAT('%',:pesq,'%')`;
         }
 
-        console.log(query)
+        const termoFormatado = pesq.trim().replace(/[+\-><()~*\"@]+/g, ' ').split(/\s+/).filter(palavra => palavra.length >= 3).map(palavra => `+${palavra}*`).join(' ');
 
-        const [rows] = await this.ExecuteQuery(query, { pesq }) as RowDataPacket[];
+        const [rows] = await this.ExecuteQuery(query, { pesq: termoFormatado }) as RowDataPacket[];
 
         return rows as iMedicamentosFields[];
     }

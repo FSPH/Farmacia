@@ -10,6 +10,7 @@ import { AppModal, DataState, PageSection, ReferenceNotification } from '../../c
 import { getErrorMessage, useMessage } from '../../hooks/useMessage'
 import { getApiBaseUrl } from '../../lib/api-base-url'
 import { getSessionUsername } from '../../lib/auth-helpers'
+import { formatDateForDisplay, parseCalendarDate } from '../../lib/date'
 import '../boname/BonameCrudPage.css'
 import './NovaSolicitacaoTransferenciaPage.css'
 
@@ -151,17 +152,11 @@ function formatDateForInput(date: Date): string {
 }
 
 function formatDate(value: Date | null): string {
-  return value ? value.toLocaleDateString('pt-BR') : '-'
+  return formatDateForDisplay(value)
 }
 
 function formatDateValue(value: Date | string | null): Date | null {
-  if (!value) {
-    return null
-  }
-
-  const parsedDate = value instanceof Date ? value : new Date(value)
-
-  return Number.isNaN(parsedDate.getTime()) ? null : parsedDate
+  return parseCalendarDate(value)
 }
 
 function formatNumber(value: number): string {

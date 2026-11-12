@@ -16,6 +16,7 @@ import {
 } from 'rsuite'
 import EditIcon from '@rsuite/icons/Edit'
 import ReloadIcon from '@rsuite/icons/Reload'
+import { formatDateForDisplay as formatCalendarDateForDisplay } from '../../lib/date'
 import SearchIcon from '@rsuite/icons/Search'
 import TrashIcon from '@rsuite/icons/Trash'
 import VisibleIcon from '@rsuite/icons/Visible'
@@ -138,13 +139,7 @@ function parseDateFromInput(value: string): Date | null {
 }
 
 function formatDateForDisplay(value: string) {
-  const parsedDate = parseDateFromInput(String(value).slice(0, 10))
-
-  if (!parsedDate) {
-    return '-'
-  }
-
-  return parsedDate.toLocaleDateString('pt-BR')
+  return formatCalendarDateForDisplay(value)
 }
 
 function createDefaultEditItemForm(): EditItemForm {

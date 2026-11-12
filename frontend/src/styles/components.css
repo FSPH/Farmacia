@@ -72,6 +72,7 @@
 }
 
 .page-section {
+  min-width: 0;
   border: 1px solid var(--border-soft);
   border-radius: 1.4rem;
   background: rgba(255, 255, 255, 0.94);
@@ -346,6 +347,14 @@
   border: 1px solid var(--border-soft);
   box-shadow: var(--shadow-strong);
   background: var(--app-modal-form-background);
+}
+
+.app-modal .rs-modal-dialog,
+.app-modal .rs-modal-content,
+.app-modal .rs-modal-body,
+.app-modal__body-content {
+  min-width: 0;
+  max-width: 100%;
 }
 
 .app-modal .rs-modal-content {
@@ -1112,7 +1121,8 @@
 }
 
 .dashboard-page__table-frame {
-  overflow: hidden;
+  min-width: 0;
+  overflow: auto;
   min-height: 8rem;
 }
 

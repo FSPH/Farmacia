@@ -10,6 +10,7 @@ import { AppModal, DataState, PageSection, StatusBadge } from '../../../componen
 import { getErrorMessage, useMessage } from '../../../hooks/useMessage'
 import { useMask } from '../../../hooks/useMask'
 import { apiRequest } from '../../../lib/api'
+import { formatDateForDisplay as formatCalendarDateForDisplay, parseCalendarDate } from '../../../lib/date'
 import '../../boname/BonameCrudPage.css'
 import '../../estoque/SolicitacoesEncerradasPage.css'
 import './ControleDoseDomiciliarPage.css'
@@ -100,17 +101,7 @@ function getDefaultFilterValues(): FilterValues {
 }
 
 function formatDateForDisplay(value?: string | null): string {
-  if (!value) {
-    return '-'
-  }
-
-  const parsedDate = new Date(`${String(value).slice(0, 10)}T00:00:00`)
-
-  if (Number.isNaN(parsedDate.getTime())) {
-    return '-'
-  }
-
-  return parsedDate.toLocaleDateString('pt-BR')
+  return formatCalendarDateForDisplay(value)
 }
 
 function formatNumber(value?: number | string | null): string {
@@ -155,18 +146,22 @@ function validateFilters(values: FilterValues): FilterErrors {
     return errors
   }
 
-  const initialDate = new Date(values.dataInicial)
-  const finalDate = new Date(values.dataFinal)
+  const initialDate = parseCalendarDate(values.dataInicial)
+  const finalDate = parseCalendarDate(values.dataFinal)
 
-  if (Number.isNaN(initialDate.getTime())) {
+  if (!initialDate) {
     errors.dataInicial = 'Data inicial invalida.'
   }
 
-  if (Number.isNaN(finalDate.getTime())) {
+  if (!finalDate) {
     errors.dataFinal = 'Data final invalida.'
   }
 
   if (errors.dataInicial || errors.dataFinal) {
+    return errors
+  }
+
+  if (!initialDate || !finalDate) {
     return errors
   }
 
