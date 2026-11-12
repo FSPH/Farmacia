@@ -808,7 +808,7 @@ export default class Controller_Requisicoes {
                     throw error;
                 }
 
-                requisicao_dispensacao ? estoque.est_saldo_disponivel += itemQtde : estoque.est_saldo_disponivel -= itemQtde;
+                requisicao_dispensacao ? estoque.est_saldo_disponivel -= itemQtde : estoque.est_saldo_disponivel += itemQtde;
 
                 await estoque.Salvar();
 
