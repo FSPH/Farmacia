@@ -1,4 +1,4 @@
-import { getAppId, getAuthApiBaseUrl, getAuthToken, type JsonRecord } from './auth-helpers'
+import { getAppId, getAuthApiBaseUrl, getAuthToken, isAuthenticationDisabled, type JsonRecord } from './auth-helpers'
 import { getSession, saveSession } from './storage-session'
 
 export type PermissionRoute = {
@@ -139,7 +139,7 @@ export function userHasGroup(groupId: number, profile?: JsonRecord | null): bool
 }
 
 export function isSectionAllowed(sectionKey: string, allowedPaths = getAllowedRoutePaths()): boolean {
-  if (import.meta.env.DEV) {
+  if (isAuthenticationDisabled()) {
     return true
   }
 

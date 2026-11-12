@@ -97,7 +97,10 @@ export default async function authMiddleware(req: Request, res: Response, next: 
     const token = resolveAuthToken(req);
 
     if (!token) {
-        if (process.env.NODE_ENV !== 'production') {
+        const authenticationDisabled = process.env.NODE_ENV !== 'production'
+            || ['1', 'true', 'yes', 'on'].includes(String(process.env.AUTH_DISABLED || '').toLowerCase());
+
+        if (authenticationDisabled) {
             const developmentUser = { user: 'development', username: 'development' };
             req.authUser = buildAuthUserFromPayload(developmentUser, true);
             res.locals.user = developmentUser;

@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
-import 'dotenv/config';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import routes_locais from './routes/routes_locais.js';
 import routes_boname from './routes/routes_boname.js';
 import routes_depositos from './routes/routes_depositos.js';
@@ -39,7 +40,11 @@ declare global {
     }
 }
 
-config({ path: '../.env' })
+const projectEnvPath = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../.env');
+config({ path: projectEnvPath });
+
+
+
 
 const app = express();
 const port: number = Number(process.env.PORT || 3002);

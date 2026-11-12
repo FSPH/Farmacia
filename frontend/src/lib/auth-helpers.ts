@@ -18,6 +18,11 @@ const DEVELOPMENT_USER_PROFILE: JsonRecord = {
   name: 'Usuário Desenvolvimento',
 }
 
+export function isAuthenticationDisabled(): boolean {
+  const configured = String(import.meta.env.VITE_AUTH_DISABLED || '').trim().toLowerCase()
+  return import.meta.env.DEV || configured === 'true' || configured === '1' || configured === 'yes'
+}
+
 export function getAppId(): number {
   const raw = String(import.meta.env.VITE_APP_ID || '').trim()
   const parsed = Number(raw)
@@ -277,7 +282,7 @@ export async function restoreSession(): Promise<boolean> {
     return true
   }
 
-  if (import.meta.env.DEV) {
+  if (isAuthenticationDisabled()) {
     persistUserProfile(getSession<JsonRecord>('_upf') ?? DEVELOPMENT_USER_PROFILE)
     return true
   }
@@ -336,7 +341,7 @@ export function forceLoginRedirect(): void {
   clearSessionCache()
   clearAuthCookies()
 
-  if (import.meta.env.DEV) {
+  if (isAuthenticationDisabled()) {
     persistUserProfile(DEVELOPMENT_USER_PROFILE)
     return
   }
