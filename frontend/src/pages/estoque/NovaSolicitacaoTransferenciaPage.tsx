@@ -9,6 +9,7 @@ import { Cell, Column, HeaderCell, Table } from '../../components/Table'
 import { AppModal, DataState, PageSection, ReferenceNotification } from '../../components/ui'
 import { getErrorMessage, useMessage } from '../../hooks/useMessage'
 import { getApiBaseUrl } from '../../lib/api-base-url'
+import { getSessionUsername } from '../../lib/auth-helpers'
 import { formatDateForDisplay, parseCalendarDate } from '../../lib/date'
 import '../boname/BonameCrudPage.css'
 import './NovaSolicitacaoTransferenciaPage.css'
@@ -107,7 +108,6 @@ export interface NovaSolicitacaoTransferenciaPageProps {
 }
 
 const LOCAL_STORAGE_TOKEN_KEYS = ['authToken', 'access_token', 'token', 'jwtToken']
-const SESSION_USER_STORAGE_KEY = 'sessionUser'
 const MAX_LOTE_LENGTH = 60
 const MAX_OBSERVACAO_LENGTH = 500
 
@@ -142,33 +142,6 @@ function getStoredToken(): string | null {
   }
 
   return null
-}
-
-function getStoredSessionUsername(): string {
-  if (typeof window === 'undefined') {
-    return ''
-  }
-
-  const rawSessionUser = window.localStorage.getItem(SESSION_USER_STORAGE_KEY)
-
-  if (!rawSessionUser) {
-    return ''
-  }
-
-  try {
-    const sessionUser = JSON.parse(rawSessionUser) as Record<string, unknown>
-
-    return String(
-      sessionUser.username
-      || sessionUser.user
-      || sessionUser.user_name
-      || sessionUser.preferred_username
-      || sessionUser.id
-      || ''
-    ).trim()
-  } catch {
-    return ''
-  }
 }
 
 function formatDateForInput(date: Date): string {
@@ -371,7 +344,7 @@ async function salvarSolicitacao(
         sol_date: headerForm.dataSolicitacao ? formatDateForInput(headerForm.dataSolicitacao) : '',
         sol_dep_ori_id: headerForm.depositoOrigemId ?? 0,
         sol_dep_des_id: headerForm.depositoDestinoId ?? 0,
-        sol_user_create: getStoredSessionUsername(),
+        sol_user_create: getSessionUsername(),
         sol_status: 0,
         sol_obs: normalizeText(headerForm.observacao, MAX_OBSERVACAO_LENGTH).trim(),
         itens,
@@ -708,7 +681,7 @@ export function NovaSolicitacaoTransferenciaPage({
   }
 
   const handleSaveSolicitacao = () => {
-    if (!getStoredSessionUsername()) {
+    if (!getSessionUsername()) {
       message.error('Sessao invalida', 'Nao foi possivel identificar o usuario criador da solicitacao.')
       return
     }

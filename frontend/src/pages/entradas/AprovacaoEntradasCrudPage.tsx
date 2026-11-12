@@ -25,6 +25,7 @@ import { AppModal, DataState, PageSection, StatusBadge } from '../../components/
 import { getErrorMessage, useMessage } from '../../hooks/useMessage'
 import { useMask } from '../../hooks/useMask'
 import { getApiBaseUrl } from '../../lib/api-base-url'
+import { getSessionUsername } from '../../lib/auth-helpers'
 import '../boname/BonameCrudPage.css'
 
 interface ApiResponse<T> {
@@ -93,7 +94,6 @@ export interface AprovacaoEntradasCrudPageProps {
 }
 
 const LOCAL_STORAGE_TOKEN_KEYS = ['authToken', 'access_token', 'token', 'jwtToken']
-const SESSION_USER_STORAGE_KEY = 'sessionUser'
 const MAX_PERIOD_DAYS = 45
 const PAGE_SIZE = 13
 const MODAL_PAGE_SIZE = 8
@@ -114,33 +114,6 @@ function getStoredToken(): string | null {
   }
 
   return null
-}
-
-function getStoredSessionUsername(): string {
-  if (typeof window === 'undefined') {
-    return ''
-  }
-
-  const rawSessionUser = window.localStorage.getItem(SESSION_USER_STORAGE_KEY)
-
-  if (!rawSessionUser) {
-    return ''
-  }
-
-  try {
-    const sessionUser = JSON.parse(rawSessionUser) as Record<string, unknown>
-
-    return String(
-      sessionUser.username
-      || sessionUser.user
-      || sessionUser.user_name
-      || sessionUser.preferred_username
-      || sessionUser.id
-      || '',
-    ).trim()
-  } catch {
-    return ''
-  }
 }
 
 function buildUrl(baseUrl: string, path: string): string {
@@ -589,7 +562,7 @@ const aprovarEntradaMutation = useMutation({
       return
     }
 
-    const sessionUsername = getStoredSessionUsername()
+    const sessionUsername = getSessionUsername()
 
     if (!sessionUsername) {
       message.error('Sessao invalida', 'Nao foi possivel identificar o usuario aprovador da entrada.')
