@@ -86,6 +86,7 @@ function isPrivateNetworkOrigin(origin: string): boolean {
 
 console.clear();
 
+app.disable('etag');
 app.use(helmet());
 
 /*app.use(morgan((tokens, req, res) => {
@@ -132,6 +133,13 @@ app.use(cors({
     optionsSuccessStatus: 204,
 
 }));
+
+app.use((_req, res, next) => {
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+    next();
+});
 
 app.use('/auth', routes_auth);
 
