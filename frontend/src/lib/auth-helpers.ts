@@ -310,6 +310,7 @@ export async function logoutRedirect(): Promise<void> {
     await fetch(`${getAuthApiBaseUrl()}/apiauth/logout`, {
       method: 'POST',
       credentials: 'include',
+      cache: 'no-store',
     })
   } catch {
     // ignore logout network errors
