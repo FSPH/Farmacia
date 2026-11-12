@@ -10,6 +10,20 @@ type JwtPayload = JsonRecord & {
 let latestAuthToken: string | null = null
 let tokenRenewalTimeout: ReturnType<typeof setTimeout> | null = null
 
+const DEVELOPMENT_USER_PROFILE: JsonRecord = {
+  id: 1,
+  user: 'test',
+  username: 'test',
+  fullname: 'Usuário Desenvolvimento',
+  name: 'Usuário Desenvolvimento',
+}
+
+export function getAppId(): number {
+  const raw = String(import.meta.env.VITE_APP_ID || '').trim()
+  const parsed = Number(raw)
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : 0
+}
+
 export function getAuthApiBaseUrl(): string {
   const configured = String(import.meta.env.VITE_API_AUTH || '').trim().replace(/\/$/, '')
   if (configured) {
@@ -30,7 +44,7 @@ export function getSaLoginUrl(): string {
   }
 
   if (typeof window !== 'undefined' && window.location?.hostname) {
-    return `${window.location.protocol}//${window.location.hostname}:3007`
+    return `${window.location.protocol}//${window.location.hostname}:3002`
   }
 
   return '/'
@@ -263,6 +277,11 @@ export async function restoreSession(): Promise<boolean> {
     return true
   }
 
+  if (import.meta.env.DEV) {
+    persistUserProfile(getSession<JsonRecord>('_upf') ?? DEVELOPMENT_USER_PROFILE)
+    return true
+  }
+
   const cachedProfile = getSession<JsonRecord>('_upf')
   if (cachedProfile) {
     return true
@@ -316,6 +335,12 @@ export async function logoutRedirect(): Promise<void> {
 export function forceLoginRedirect(): void {
   clearSessionCache()
   clearAuthCookies()
+
+  if (import.meta.env.DEV) {
+    persistUserProfile(DEVELOPMENT_USER_PROFILE)
+    return
+  }
+
   window.location.href = getSaLoginUrl()
 }
 
