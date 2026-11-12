@@ -139,6 +139,10 @@ export function userHasGroup(groupId: number, profile?: JsonRecord | null): bool
 }
 
 export function isSectionAllowed(sectionKey: string, allowedPaths = getAllowedRoutePaths()): boolean {
+  if (import.meta.env.DEV) {
+    return true
+  }
+
   if (sectionKey === 'inicio') {
     return true
   }
