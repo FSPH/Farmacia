@@ -44,7 +44,7 @@ export function getSaLoginUrl(): string {
   }
 
   if (typeof window !== 'undefined' && window.location?.hostname) {
-    return `${window.location.protocol}//${window.location.hostname}:3002`
+    return `${window.location.protocol}//${window.location.hostname}:3007`
   }
 
   return '/'
