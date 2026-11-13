@@ -18,6 +18,8 @@ const DEVELOPMENT_USER_PROFILE: JsonRecord = {
   name: 'Usuário Desenvolvimento',
 }
 
+const LOGOUT_REDIRECT_URL = 'http://172.23.42.30:3007'
+
 export function isAuthenticationDisabled(): boolean {
   const configured = String(import.meta.env.VITE_AUTH_DISABLED || '').trim().toLowerCase()
   return import.meta.env.DEV || configured === 'true' || configured === '1' || configured === 'yes'
@@ -334,7 +336,7 @@ export async function logoutRedirect(): Promise<void> {
     // ignore logout network errors
   }
 
-  window.location.href = getSaLoginUrl()
+  window.location.href = LOGOUT_REDIRECT_URL
 }
 
 export function forceLoginRedirect(): void {
