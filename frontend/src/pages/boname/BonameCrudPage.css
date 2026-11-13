@@ -1435,6 +1435,21 @@
   overflow-y: hidden !important;
 }
 
+.requisicao-paciente-page__patient-modal .rs-modal-content,
+.requisicao-paciente-page__patient-modal .rs-modal-body,
+.requisicao-paciente-page__patient-modal .app-modal__body-content,
+.requisicao-paciente-page__patient-modal .boname-page__modal-shell,
+.requisicao-paciente-page__patient-modal .demandas-especificas-page__patient-lookup-panel {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.requisicao-paciente-page__patient-modal .app-modal__body-content,
+.requisicao-paciente-page__patient-modal .boname-page__modal-shell,
+.requisicao-paciente-page__patient-modal .demandas-especificas-page__patient-lookup-panel {
+  flex: 1 1 auto;
+}
+
 .requisicao-paciente-page__patient-modal .app-modal__body-content,
 .requisicao-paciente-page__medicamento-modal .app-modal__body-content,
 .requisicao-setor-page__medicamento-modal .app-modal__body-content,
@@ -1463,6 +1478,10 @@
   flex: 1 1 auto;
   width: 100%;
   background: transparent;
+}
+
+.requisicao-paciente-page__patient-modal .requisicao-paciente-page__modal-table-wrap .app-table__container {
+  overflow: hidden;
 }
 
 .requisicao-paciente-page__modal-table-wrap .rs-table-scrollbar-horizontal,

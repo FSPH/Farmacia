@@ -494,7 +494,6 @@ export function RequisicaoPorPacientePage() {
   const currentPacienteLookupPage = Math.min(pacienteLookupPage, Math.max(1, Math.ceil(pacientes.length / PAGE_SIZE)))
   const pacienteLookupPageStart = (currentPacienteLookupPage - 1) * PAGE_SIZE
   const paginatedPacientes = pacientes.slice(pacienteLookupPageStart, pacienteLookupPageStart + PAGE_SIZE)
-  const pacienteLookupTableHeight = Math.min(Math.max(paginatedPacientes.length * 54 + 112, 280), 560)
   const estoqueMedicamentos = estoqueMedicamentosQuery.data ?? EMPTY_ESTOQUE_MEDICAMENTOS
   const hasBootstrapError = locaisQuery.isError || depositosQuery.isError
   const filteredEstoqueMedicamentos = useMemo(() => {
@@ -1031,7 +1030,6 @@ export function RequisicaoPorPacientePage() {
                   <Table
                     key={pacienteLookupTableInstance}
                     data={paginatedPacientes}
-                    height={pacienteLookupTableHeight}
                     fillHeight
                     bordered
                     rowHeight={54}
