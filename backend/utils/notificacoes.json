@@ -1,11 +1,33 @@
 [
   {
-    "id": "NOT-1309",
+    "id": "NOT-202616",
+    "title": "Alerta de Inventário Mensal",
+    "description": "Ocorreram apenas 0 dos 3 inventários previstos para o mês.",
+    "tone": "info",
+    "read": false,
+    "createdAt": "2026-11-16T12:53:48.301Z",
+    "actionLabel": "Abrir pagina de Novos Inventários",
+    "actionSectionKey": "operacao/inventarios/novo",
+    "critical": false
+  },
+  {
+    "id": "NOT-1609",
     "title": "Alerta de Validade",
     "description": "49 lotes com validade dentro do prazo de alerta ou vencidos.",
     "tone": "warning",
     "read": false,
-    "createdAt": "2026-11-13T12:41:17.479Z",
+    "createdAt": "2026-11-16T12:53:48.297Z",
+    "actionLabel": "Abrir Alerta de Validade",
+    "actionSectionKey": "estoque/alerta_validade",
+    "critical": true
+  },
+  {
+    "id": "NOT-1311",
+    "title": "Alerta de Validade",
+    "description": "49 lotes com validade dentro do prazo de alerta ou vencidos.",
+    "tone": "warning",
+    "read": false,
+    "createdAt": "2026-11-13T14:01:49.189Z",
     "actionLabel": "Abrir Alerta de Validade",
     "actionSectionKey": "estoque/alerta_validade",
     "critical": true
@@ -16,18 +38,18 @@
     "description": "Ocorreram apenas 0 dos 3 inventários previstos para o mês.",
     "tone": "info",
     "read": false,
-    "createdAt": "2026-11-13T10:05:48.834Z",
+    "createdAt": "2026-11-13T13:06:37.768Z",
     "actionLabel": "Abrir pagina de Novos Inventários",
     "actionSectionKey": "operacao/inventarios/novo",
     "critical": false
   },
   {
-    "id": "NOT-1307",
+    "id": "NOT-1310",
     "title": "Alerta de Validade",
     "description": "49 lotes com validade dentro do prazo de alerta ou vencidos.",
     "tone": "warning",
     "read": false,
-    "createdAt": "2026-11-13T10:05:48.833Z",
+    "createdAt": "2026-11-13T13:06:37.766Z",
     "actionLabel": "Abrir Alerta de Validade",
     "actionSectionKey": "estoque/alerta_validade",
     "critical": true
