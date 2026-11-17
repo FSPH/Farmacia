@@ -250,7 +250,7 @@ export default class Controller_Inventarios {
             }
 
             //confirma as alterações no banco de dados
-            //void await db.Commit();
+            void await db.Commit();
 
             resdata.msg = `Inventário ${inv_num} aberto com sucesso`;
             resdata.data = {
