@@ -158,7 +158,7 @@ export default class Controller_Inventarios {
                 throw error;
             }
 
-            if (Object.values(eTipo).includes(inv_tipo)) {
+            if (!Object.values(eTipo).includes(inv_tipo)) {
                 const error = new Error('Tipo de inventário inválido.');
                 error.statusCode = 400;
                 throw error;
@@ -171,9 +171,11 @@ export default class Controller_Inventarios {
             const depositos = new Depositos(db.connection);
 
             const dateinv = new Date(inv_date);
+            const ano = dateinv.getFullYear();
+            const mes = (dateinv.getMonth() + 1).toString().padStart(2, '0');
 
-            if (await inventarios.CheckInventarioExist(dep_id, dateinv.getFullYear(), dateinv.getMonth() + 1, med_tipo_codigo)) {
-                const error = new Error('Já existe um inventario total para este mes.') as any;
+            if (await inventarios.CheckInventarioExist(dep_id, ano, Number(mes), med_tipo_codigo) && inv_tipo == eTipo.Total) {
+                const error = new Error(`Já existe um inventario total para este mes ${ano}-${mes}.`) as any;
                 error.statusCode = 403;
                 throw error;
             }
@@ -248,7 +250,7 @@ export default class Controller_Inventarios {
             }
 
             //confirma as alterações no banco de dados
-            void await db.Commit();
+            //void await db.Commit();
 
             resdata.msg = `Inventário ${inv_num} aberto com sucesso`;
             resdata.data = {

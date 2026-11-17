@@ -120,7 +120,7 @@ export default class Inventarios extends BaseModel implements iBaseModel, iInven
 
         const [rows] = await this.ExecuteQuery(query, { deposito, ano, mes, tipo, med_tipo_codigo }) as RowDataPacket[]
 
-        if (rows[0].length > 0) {
+        if (rows.length > 0) {
             return false;
         }
         else {
