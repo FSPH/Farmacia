@@ -42,7 +42,7 @@ export default class Database implements iDatabase {
                 decimalNumbers: true,
                 dateStrings: true,
                 timezone: '-03:00',
-                charset: 'utf8mb4',3
+                charset: 'utf8mb4',
                 waitForConnections: true,
                 connectionLimit: 10,
                 queueLimit: 0,
